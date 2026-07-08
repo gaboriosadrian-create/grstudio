@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { X, Save, RotateCcw, Copy, Check, Users, Sparkles, Sliders, DollarSign, Award, Briefcase, Grid, Trash2, Plus, Upload, Loader2 } from 'lucide-react';
 import { PortfolioData, Project } from '../types';
 
-// Utility helper to convert GitHub web blob URLs to raw direct image URLs
+// Utility helper to convert GitHub web blob URLs to raw direct image URLs and map to local paths
 export const cleanImageUrl = (url: string): string => {
   if (!url) return '';
   let cleaned = url.trim();
@@ -12,6 +12,43 @@ export const cleanImageUrl = (url: string): string => {
       .replace('github.com', 'raw.githubusercontent.com')
       .replace('/blob/', '/');
   }
+
+  // Rewrite absolute GitHub raw URLs to clean local relative paths
+  if (cleaned.includes('raw.githubusercontent.com') || cleaned.includes('github.com')) {
+    const parts = cleaned.split('/');
+    const filename = parts[parts.length - 1];
+
+    const mappings: { [key: string]: string } = {
+      'logo_1783457905492_visual_creator.png': '/images/logo/logo_1783526590479_visual_creator.png',
+      'portfolio_1783533443391_1.png': '/images/portfolio/portfolio_1783533443391_1.png',
+      'portfolio_1783526665882_portfolio_1783458149488_vacaciones_de_invierno_reel1.mp4': '/images/portfolio/portfolio_1783526665882_portfolio_1783458149488_vacaciones_de_invierno_reel1.mp4',
+      'portfolio_1783457982196_whatsapp_image_2026_05_27_at_10_15_07.jpeg': '/images/portfolio/portfolio_1783526752066_portfolio_1783457982196_whatsapp_image_2026_05_27_at_10_15_07.jpeg',
+      'portfolio_1783458014969_sandwichsdemonta__a.png': '/images/portfolio/portfolio_1783526765515_portfolio_1783458014969_sandwichsdemonta__a.png',
+      'portfolio_1783457958698_1.png': '/images/portfolio/portfolio_1783526781479_portfolio_1783457958698_1.png',
+      'portfolio_1783458238302_1.png': '/images/portfolio/portfolio_1783526817754_portfolio_1783458238302_1.png',
+      'portfolio_1783458212364_2.png': '/images/portfolio/portfolio_1783526843636_portfolio_1783458212364_2.png',
+      'portfolio_1783458258825_3.png': '/images/portfolio/portfolio_1783526868491_branding_balc__n_del_r__o.png',
+      'portfolio_1783458297361_optimizarig.png': '/images/portfolio/portfolio_1783526889641_portfolio_1783458297361_optimizarig.png',
+      'portfolio_1783458323202_1.png': '/images/portfolio/portfolio_1783526904813_portfolio_1783458323202_1.png',
+      'portfolio_1783458338347_5.png': '/images/portfolio/portfolio_1783526918132_portfolio_1783458338347_5.png',
+      'portfolio_1783458359969_slide_01.png': '/images/portfolio/portfolio_1783526943721_portfolio_1783458359969_slide_01.png',
+      'portfolio_1783458379889_slide_02.png': '/images/portfolio/portfolio_1783526955543_portfolio_1783458379889_slide_02.png',
+      'portfolio_1783458395288_slide_04.png': '/images/portfolio/portfolio_1783526966685_portfolio_1783458395288_slide_04.png',
+      'f1.png': '/images/portfolio/portfolio_1783526988362_f1.png',
+      'f2.png': '/images/portfolio/portfolio_1783526999377_f2.png',
+      'f6.png': '/images/portfolio/portfolio_1783527011407_f6.png',
+    };
+
+    if (mappings[filename]) {
+      return mappings[filename];
+    }
+
+    if (cleaned.includes('raw.githubusercontent.com/') && cleaned.includes('/public/')) {
+      const publicIndex = cleaned.indexOf('/public/');
+      return cleaned.substring(publicIndex + 7);
+    }
+  }
+
   return cleaned;
 };
 
@@ -36,7 +73,7 @@ const cleanPortfolioData = (data: PortfolioData): PortfolioData => {
 
 interface EditorPanelProps {
   data: PortfolioData;
-  onSave: (newData: PortfolioData) => void;
+  onSave: (newData: PortfolioData, immediate?: boolean) => void;
   onReset: () => void;
   onClose: () => void;
 }
@@ -60,9 +97,15 @@ export default function EditorPanel({ data, onSave, onReset, onClose }: EditorPa
     onSaveRef.current = onSave;
   }, [onSave]);
 
+  const isFirstMount = React.useRef(true);
+
   // Sync edits to parent in real-time for live preview (including uploaded files)
   React.useEffect(() => {
-    onSaveRef.current(editedData);
+    if (isFirstMount.current) {
+      isFirstMount.current = false;
+      return;
+    }
+    onSaveRef.current(editedData, false);
   }, [editedData]);
 
   const convertToBase64 = (file: File): Promise<string> => {
@@ -444,7 +487,7 @@ export default function EditorPanel({ data, onSave, onReset, onClose }: EditorPa
   };
 
   const handleSave = () => {
-    onSave(editedData);
+    onSave(editedData, true);
     onClose();
   };
 

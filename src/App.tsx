@@ -15,13 +15,97 @@ import Pricing from './components/Pricing';
 import Contact from './components/Contact';
 import EditorPanel from './components/EditorPanel';
 
+// Helper to rewrite old GitHub raw URLs to clean, local, relative paths that exist in /public
+export const mapUrlToLocal = (url: string): string => {
+  if (!url) return '';
+  const trimmed = url.trim();
+  if (!trimmed.includes('raw.githubusercontent.com') && !trimmed.includes('github.com')) {
+    return trimmed;
+  }
+
+  // Extract the original filename
+  const parts = trimmed.split('/');
+  const filename = parts[parts.length - 1];
+
+  const mappings: { [key: string]: string } = {
+    // Logo
+    'logo_1783457905492_visual_creator.png': '/images/logo/logo_1783526590479_visual_creator.png',
+    
+    // Project 1
+    'portfolio_1783533443391_1.png': '/images/portfolio/portfolio_1783533443391_1.png',
+    'portfolio_1783526665882_portfolio_1783458149488_vacaciones_de_invierno_reel1.mp4': '/images/portfolio/portfolio_1783526665882_portfolio_1783458149488_vacaciones_de_invierno_reel1.mp4',
+
+    // Project 2
+    'portfolio_1783457982196_whatsapp_image_2026_05_27_at_10_15_07.jpeg': '/images/portfolio/portfolio_1783526752066_portfolio_1783457982196_whatsapp_image_2026_05_27_at_10_15_07.jpeg',
+    'portfolio_1783458014969_sandwichsdemonta__a.png': '/images/portfolio/portfolio_1783526765515_portfolio_1783458014969_sandwichsdemonta__a.png',
+    'portfolio_1783457958698_1.png': '/images/portfolio/portfolio_1783526781479_portfolio_1783457958698_1.png',
+
+    // Project 3
+    'portfolio_1783458238302_1.png': '/images/portfolio/portfolio_1783526817754_portfolio_1783458238302_1.png',
+    'portfolio_1783458212364_2.png': '/images/portfolio/portfolio_1783526843636_portfolio_1783458212364_2.png',
+    'portfolio_1783458258825_3.png': '/images/portfolio/portfolio_1783526868491_branding_balc__n_del_r__o.png',
+
+    // Project 4
+    'portfolio_1783458297361_optimizarig.png': '/images/portfolio/portfolio_1783526889641_portfolio_1783458297361_optimizarig.png',
+    'portfolio_1783458323202_1.png': '/images/portfolio/portfolio_1783526904813_portfolio_1783458323202_1.png',
+    'portfolio_1783458338347_5.png': '/images/portfolio/portfolio_1783526918132_portfolio_1783458338347_5.png',
+
+    // Project 5
+    'portfolio_1783458359969_slide_01.png': '/images/portfolio/portfolio_1783526943721_portfolio_1783458359969_slide_01.png',
+    'portfolio_1783458379889_slide_02.png': '/images/portfolio/portfolio_1783526955543_portfolio_1783458379889_slide_02.png',
+    'portfolio_1783458395288_slide_04.png': '/images/portfolio/portfolio_1783526966685_portfolio_1783458395288_slide_04.png',
+
+    // Project 6
+    'f1.png': '/images/portfolio/portfolio_1783526988362_f1.png',
+    'f2.png': '/images/portfolio/portfolio_1783526999377_f2.png',
+    'f6.png': '/images/portfolio/portfolio_1783527011407_f6.png',
+  };
+
+  if (mappings[filename]) {
+    return mappings[filename];
+  }
+
+  // General fallback for raw.githubusercontent.com files
+  if (trimmed.includes('raw.githubusercontent.com/') && trimmed.includes('/public/')) {
+    const publicIndex = trimmed.indexOf('/public/');
+    return trimmed.substring(publicIndex + 7);
+  }
+
+  return trimmed;
+};
+
+// Deeply cleans/sanitizes all image/video URLs within a PortfolioData object
+export const sanitizePortfolioData = (portfolio: PortfolioData): PortfolioData => {
+  if (!portfolio) return portfolio;
+  const clean = JSON.parse(JSON.stringify(portfolio));
+  
+  if (clean.profile) {
+    if (clean.profile.logoUrl) clean.profile.logoUrl = mapUrlToLocal(clean.profile.logoUrl);
+    if (clean.profile.profilePhotoUrl) clean.profile.profilePhotoUrl = mapUrlToLocal(clean.profile.profilePhotoUrl);
+  }
+  
+  if (Array.isArray(clean.projects)) {
+    clean.projects = clean.projects.map((proj: any) => {
+      if (proj.imageUrl) proj.imageUrl = mapUrlToLocal(proj.imageUrl);
+      if (proj.videoUrl) proj.videoUrl = mapUrlToLocal(proj.videoUrl);
+      if (Array.isArray(proj.imageUrls)) {
+        proj.imageUrls = proj.imageUrls.map((url: string) => mapUrlToLocal(url));
+      }
+      return proj;
+    });
+  }
+  
+  return clean;
+};
+
 export default function App() {
-  const [data, setData] = useState<PortfolioData>(defaultPortfolioData);
+  const [data, setData] = useState<PortfolioData>(() => sanitizePortfolioData(defaultPortfolioData));
   const [isDark, setIsDark] = useState(false);
   const [isEditorOpen, setIsEditorOpen] = useState(false);
   const [copied, setCopied] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const saveTimeoutRef = useRef<any>(null);
+  const previewTimeoutRef = useRef<any>(null);
 
   // Initialize theme and portfolio data on load
   useEffect(() => {
@@ -83,13 +167,13 @@ export default function App() {
     loadPortfolioData()
       .then((savedData) => {
         if (savedData) {
-          setData(savedData);
+          setData(sanitizePortfolioData(savedData));
         } else {
           // Fallback / Migrate from localStorage if it exists
           try {
             const legacyData = localStorage.getItem('user_portfolio_data');
             if (legacyData) {
-              const parsed = JSON.parse(legacyData);
+              const parsed = sanitizePortfolioData(JSON.parse(legacyData));
               setData(parsed);
               // Migrate it to IndexedDB so it's safely stored going forward
               savePortfolioData(parsed).catch(console.error);
@@ -105,7 +189,7 @@ export default function App() {
         try {
           const legacyData = localStorage.getItem('user_portfolio_data');
           if (legacyData) {
-            setData(JSON.parse(legacyData));
+            setData(sanitizePortfolioData(JSON.parse(legacyData)));
           }
         } catch (e) {
           // Ignore
@@ -126,9 +210,20 @@ export default function App() {
   };
 
   // Portfolio data actions
-  const handleSaveData = useCallback((newData: PortfolioData) => {
-    // 1. Update React state immediately for snappy real-time preview
-    setData(newData);
+  const handleSaveData = useCallback((newData: PortfolioData, immediate = false) => {
+    const sanitizedData = sanitizePortfolioData(newData);
+    // 1. Debounce or update parent React state immediately for real-time preview
+    if (previewTimeoutRef.current) {
+      clearTimeout(previewTimeoutRef.current);
+    }
+
+    if (immediate) {
+      setData(sanitizedData);
+    } else {
+      previewTimeoutRef.current = setTimeout(() => {
+        setData(sanitizedData);
+      }, 350); // 350ms debounce for live preview updates (renders whole app)
+    }
     
     // 2. Debounce heavy saving operations (IndexedDB, fetch, localStorage stringification)
     if (saveTimeoutRef.current) {
@@ -137,7 +232,7 @@ export default function App() {
 
     saveTimeoutRef.current = setTimeout(() => {
       // Save to IndexedDB (asynchronous, robust, no 5MB limit)
-      savePortfolioData(newData)
+      savePortfolioData(sanitizedData)
         .then(() => {
           console.log('Datos guardados correctamente en IndexedDB.');
         })
@@ -147,7 +242,7 @@ export default function App() {
 
       // Avoid heavy operations if data is extremely large
       try {
-        const dataStr = JSON.stringify(newData);
+        const dataStr = JSON.stringify(sanitizedData);
 
         // Mirror to localStorage if size is within safe limits (under 4MB)
         if (dataStr.length < 4000000) {
@@ -179,11 +274,11 @@ export default function App() {
       } catch (err) {
         console.error('Error al procesar datos del portafolio:', err);
       }
-    }, 800); // 800ms debounce
+    }, 1000); // 1000ms debounce for storage & server sync
   }, []);
 
   const handleResetData = () => {
-    setData(defaultPortfolioData);
+    setData(sanitizePortfolioData(defaultPortfolioData));
     deletePortfolioData()
       .then(() => {
         console.log('Datos de IndexedDB eliminados.');
