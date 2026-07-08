@@ -13,99 +13,18 @@ import Portfolio from './components/Portfolio';
 import Process from './components/Process';
 import Pricing from './components/Pricing';
 import Contact from './components/Contact';
-import EditorPanel from './components/EditorPanel';
+
+// Lazy load the editor panel to prevent blocking UI thread on mount
+const EditorPanel = React.lazy(() => import('./components/EditorPanel'));
 
 // Helper to rewrite old GitHub raw or blob URLs to clean, local, relative paths that exist in /public
 export const mapUrlToLocal = (url: string): string => {
-  if (!url) return '';
-  let cleaned = url.trim();
-
-  // Normalize github.com blob URLs to raw.githubusercontent.com
-  if (cleaned.includes('github.com/') && cleaned.includes('/blob/')) {
-    cleaned = cleaned
-      .replace('github.com', 'raw.githubusercontent.com')
-      .replace('/blob/', '/');
-  }
-
-  if (!cleaned.includes('raw.githubusercontent.com') && !cleaned.includes('github.com')) {
-    return cleaned;
-  }
-
-  // Extract the original filename, ignoring query params like ?raw=true
-  const urlParts = cleaned.split('/');
-  let filename = urlParts[urlParts.length - 1] || '';
-  filename = filename.split('?')[0].split('#')[0];
-
-  const mappings: { [key: string]: string } = {
-    // Logo
-    'logo_1783457905492_visual_creator.png': '/images/logo/logo_1783526590479_visual_creator.png',
-    'logo_1783432102544_visual_creator.png': '/images/logo/logo_1783526590479_visual_creator.png',
-    
-    // Project 1
-    'portfolio_1783533443391_1.png': '/images/portfolio/portfolio_1783533443391_1.png',
-    'portfolio_1783526665882_portfolio_1783458149488_vacaciones_de_invierno_reel1.mp4': '/images/portfolio/portfolio_1783526665882_portfolio_1783458149488_vacaciones_de_invierno_reel1.mp4',
-
-    // Project 2
-    'portfolio_1783457982196_whatsapp_image_2026_05_27_at_10_15_07.jpeg': '/images/portfolio/portfolio_1783526752066_portfolio_1783457982196_whatsapp_image_2026_05_27_at_10_15_07.jpeg',
-    'portfolio_1783458014969_sandwichsdemonta__a.png': '/images/portfolio/portfolio_1783526765515_portfolio_1783458014969_sandwichsdemonta__a.png',
-    'portfolio_1783457958698_1.png': '/images/portfolio/portfolio_1783526781479_portfolio_1783457958698_1.png',
-
-    // Project 3
-    'portfolio_1783458238302_1.png': '/images/portfolio/portfolio_1783526817754_portfolio_1783458238302_1.png',
-    'portfolio_1783458212364_2.png': '/images/portfolio/portfolio_1783526843636_portfolio_1783458212364_2.png',
-    'portfolio_1783458258825_3.png': '/images/portfolio/portfolio_1783526868491_branding_balc__n_del_r__o.png',
-
-    // Project 4
-    'portfolio_1783458297361_optimizarig.png': '/images/portfolio/portfolio_1783526889641_portfolio_1783458297361_optimizarig.png',
-    'portfolio_1783458323202_1.png': '/images/portfolio/portfolio_1783526904813_portfolio_1783458323202_1.png',
-    'portfolio_1783458338347_5.png': '/images/portfolio/portfolio_1783526918132_portfolio_1783458338347_5.png',
-
-    // Project 5
-    'portfolio_1783458359969_slide_01.png': '/images/portfolio/portfolio_1783526943721_portfolio_1783458359969_slide_01.png',
-    'portfolio_1783458379889_slide_02.png': '/images/portfolio/portfolio_1783526955543_portfolio_1783458379889_slide_02.png',
-    'portfolio_1783458395288_slide_04.png': '/images/portfolio/portfolio_1783526966685_portfolio_1783458395288_slide_04.png',
-
-    // Project 6
-    'f1.png': '/images/portfolio/portfolio_1783526988362_f1.png',
-    'f2.png': '/images/portfolio/portfolio_1783526999377_f2.png',
-    'f6.png': '/images/portfolio/portfolio_1783527011407_f6.png',
-  };
-
-  if (mappings[filename]) {
-    return mappings[filename];
-  }
-
-  // General fallback for raw.githubusercontent.com or github.com files containing '/public/'
-  if (cleaned.includes('/public/')) {
-    const publicIndex = cleaned.indexOf('/public/');
-    return cleaned.substring(publicIndex + 7);
-  }
-
-  return cleaned;
+  return url || '';
 };
 
 // Deeply cleans/sanitizes all image/video URLs within a PortfolioData object
 export const sanitizePortfolioData = (portfolio: PortfolioData): PortfolioData => {
-  if (!portfolio) return portfolio;
-  const clean = JSON.parse(JSON.stringify(portfolio));
-  
-  if (clean.profile) {
-    if (clean.profile.logoUrl) clean.profile.logoUrl = mapUrlToLocal(clean.profile.logoUrl);
-    if (clean.profile.profilePhotoUrl) clean.profile.profilePhotoUrl = mapUrlToLocal(clean.profile.profilePhotoUrl);
-  }
-  
-  if (Array.isArray(clean.projects)) {
-    clean.projects = clean.projects.map((proj: any) => {
-      if (proj.imageUrl) proj.imageUrl = mapUrlToLocal(proj.imageUrl);
-      if (proj.videoUrl) proj.videoUrl = mapUrlToLocal(proj.videoUrl);
-      if (Array.isArray(proj.imageUrls)) {
-        proj.imageUrls = proj.imageUrls.map((url: string) => mapUrlToLocal(url));
-      }
-      return proj;
-    });
-  }
-  
-  return clean;
+  return portfolio;
 };
 
 export default function App() {
@@ -474,12 +393,32 @@ export default function App() {
             onClick={() => setIsEditorOpen(false)}
             className="fixed inset-0 bg-black/25 dark:bg-black/50 z-40 backdrop-blur-xs transition-opacity"
           />
-          <EditorPanel
-            data={data}
-            onSave={handleSaveData}
-            onReset={handleResetData}
-            onClose={() => setIsEditorOpen(false)}
-          />
+          <React.Suspense
+            fallback={
+              <div className="fixed inset-y-0 right-0 z-50 w-full max-w-lg bg-[var(--surface-solid)] border-l border-[var(--line)] shadow-2xl flex flex-col">
+                <div className="px-6 py-5 border-b border-[var(--line)] flex items-center justify-between">
+                  <div className="flex items-center gap-2.5">
+                    <span className="text-xl">🛠️</span>
+                    <div>
+                      <h3 className="font-display font-bold text-lg text-[var(--text)] leading-none">Editor de Contenido</h3>
+                      <p className="text-xs text-[var(--muted)] font-semibold mt-1">Cargando interfaz del editor...</p>
+                    </div>
+                  </div>
+                </div>
+                <div className="flex-grow flex flex-col items-center justify-center gap-3">
+                  <div className="w-8 h-8 rounded-full border-2 border-[var(--primary)] border-t-transparent animate-spin" />
+                  <span className="text-xs text-[var(--muted)] font-black uppercase tracking-wider">Cargando...</span>
+                </div>
+              </div>
+            }
+          >
+            <EditorPanel
+              data={data}
+              onSave={handleSaveData}
+              onReset={handleResetData}
+              onClose={() => setIsEditorOpen(false)}
+            />
+          </React.Suspense>
         </>
       )}
 
