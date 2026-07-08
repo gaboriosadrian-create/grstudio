@@ -1,0 +1,1 @@
+export function resolveMediaUrl(url?:string){if(!url)return "";if(/^https?:\/\//i.test(url)){return url.replace("https://raw.githubusercontent.com/","https://cdn.jsdelivr.net/gh/").replace(/\/([^/]+)\/(main|master)\//,"@$2/");}return url.startsWith("/")?url:"/"+url;}
