@@ -111,7 +111,7 @@ export const defaultPortfolioData: PortfolioData = {
       ],
       "videoUrl": "",
       "imageUrls": [
-        "/images/portfolio/portfolio_1783533443391_1.png"
+        "/images/portfolio/portfolio_1783526665882_portfolio_1783458149488_vacaciones_de_invierno_reel1.mp4"
       ],
       "imageUrl": "/images/portfolio/portfolio_1783533443391_1.png"
     },
@@ -129,11 +129,11 @@ export const defaultPortfolioData: PortfolioData = {
       "tags": [
         "Alquimia"
       ],
-      "imageUrl": "/images/portfolio/portfolio_1783526752066_portfolio_1783457982196_whatsapp_image_2026_05_27_at_10_15_07.jpeg",
+      "imageUrl": "/images/portfolio/portfolio_1783457982196_whatsapp_image_2026_05_27_at_10_15_07.jpeg",
       "imageUrls": [
-        "/images/portfolio/portfolio_1783526752066_portfolio_1783457982196_whatsapp_image_2026_05_27_at_10_15_07.jpeg",
-        "/images/portfolio/portfolio_1783526765515_portfolio_1783458014969_sandwichsdemonta__a.png",
-        "/images/portfolio/portfolio_1783526781479_portfolio_1783457958698_1.png"
+        "/images/portfolio/portfolio_1783457982196_whatsapp_image_2026_05_27_at_10_15_07.jpeg",
+        "/images/portfolio/portfolio_1783458014969_sandwichsdemonta__a.png",
+        "/images/portfolio/portfolio_1783457958698_1.png"
       ]
     },
     {
@@ -151,9 +151,9 @@ export const defaultPortfolioData: PortfolioData = {
         "Marca",
         "Estrategia"
       ],
-      "imageUrl": "/images/portfolio/portfolio_1783526817754_portfolio_1783458238302_1.png",
+      "imageUrl": "/images/portfolio/portfolio_1783458238302_1.png",
       "imageUrls": [
-        "/images/portfolio/portfolio_1783526817754_portfolio_1783458238302_1.png",
+        "/images/portfolio/portfolio_1783458238302_1.png",
         "/images/portfolio/portfolio_1783526843636_portfolio_1783458212364_2.png",
         "/images/portfolio/portfolio_1783526868491_branding_balc__n_del_r__o.png"
       ]
