@@ -15,21 +15,31 @@ import Pricing from './components/Pricing';
 import Contact from './components/Contact';
 import EditorPanel from './components/EditorPanel';
 
-// Helper to rewrite old GitHub raw URLs to clean, local, relative paths that exist in /public
+// Helper to rewrite old GitHub raw or blob URLs to clean, local, relative paths that exist in /public
 export const mapUrlToLocal = (url: string): string => {
   if (!url) return '';
-  const trimmed = url.trim();
-  if (!trimmed.includes('raw.githubusercontent.com') && !trimmed.includes('github.com')) {
-    return trimmed;
+  let cleaned = url.trim();
+
+  // Normalize github.com blob URLs to raw.githubusercontent.com
+  if (cleaned.includes('github.com/') && cleaned.includes('/blob/')) {
+    cleaned = cleaned
+      .replace('github.com', 'raw.githubusercontent.com')
+      .replace('/blob/', '/');
   }
 
-  // Extract the original filename
-  const parts = trimmed.split('/');
-  const filename = parts[parts.length - 1];
+  if (!cleaned.includes('raw.githubusercontent.com') && !cleaned.includes('github.com')) {
+    return cleaned;
+  }
+
+  // Extract the original filename, ignoring query params like ?raw=true
+  const urlParts = cleaned.split('/');
+  let filename = urlParts[urlParts.length - 1] || '';
+  filename = filename.split('?')[0].split('#')[0];
 
   const mappings: { [key: string]: string } = {
     // Logo
     'logo_1783457905492_visual_creator.png': '/images/logo/logo_1783526590479_visual_creator.png',
+    'logo_1783432102544_visual_creator.png': '/images/logo/logo_1783526590479_visual_creator.png',
     
     // Project 1
     'portfolio_1783533443391_1.png': '/images/portfolio/portfolio_1783533443391_1.png',
@@ -65,13 +75,13 @@ export const mapUrlToLocal = (url: string): string => {
     return mappings[filename];
   }
 
-  // General fallback for raw.githubusercontent.com files
-  if (trimmed.includes('raw.githubusercontent.com/') && trimmed.includes('/public/')) {
-    const publicIndex = trimmed.indexOf('/public/');
-    return trimmed.substring(publicIndex + 7);
+  // General fallback for raw.githubusercontent.com or github.com files containing '/public/'
+  if (cleaned.includes('/public/')) {
+    const publicIndex = cleaned.indexOf('/public/');
+    return cleaned.substring(publicIndex + 7);
   }
 
-  return trimmed;
+  return cleaned;
 };
 
 // Deeply cleans/sanitizes all image/video URLs within a PortfolioData object
