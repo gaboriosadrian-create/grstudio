@@ -1,0 +1,6 @@
+{
+  "name": "Portafolio Creativo Interactivo",
+  "description": "Portafolio profesional interactivo con editor de contenido en vivo para creadores de contenido, marcas y emprendedores.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
