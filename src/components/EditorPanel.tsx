@@ -2,6 +2,38 @@ import React, { useState } from 'react';
 import { X, Save, RotateCcw, Copy, Check, Users, Sparkles, Sliders, DollarSign, Award, Briefcase, Grid, Trash2, Plus, Upload, Loader2 } from 'lucide-react';
 import { PortfolioData, Project } from '../types';
 
+// Utility helper to convert GitHub web blob URLs to raw direct image URLs
+export const cleanImageUrl = (url: string): string => {
+  if (!url) return '';
+  let cleaned = url.trim();
+  // Check if it's a GitHub blob URL (e.g., github.com/.../blob/...)
+  if (cleaned.includes('github.com/') && cleaned.includes('/blob/')) {
+    cleaned = cleaned
+      .replace('github.com', 'raw.githubusercontent.com')
+      .replace('/blob/', '/');
+  }
+  return cleaned;
+};
+
+// Deep cleans all image URLs in the portfolio data object
+const cleanPortfolioData = (data: PortfolioData): PortfolioData => {
+  const copy = JSON.parse(JSON.stringify(data));
+  if (copy.profile) {
+    if (copy.profile.logoUrl) copy.profile.logoUrl = cleanImageUrl(copy.profile.logoUrl);
+    if (copy.profile.profilePhotoUrl) copy.profile.profilePhotoUrl = cleanImageUrl(copy.profile.profilePhotoUrl);
+  }
+  if (Array.isArray(copy.projects)) {
+    copy.projects = copy.projects.map((proj: any) => {
+      if (proj.imageUrl) proj.imageUrl = cleanImageUrl(proj.imageUrl);
+      if (Array.isArray(proj.imageUrls)) {
+        proj.imageUrls = proj.imageUrls.map((u: string) => cleanImageUrl(u));
+      }
+      return proj;
+    });
+  }
+  return copy;
+};
+
 interface EditorPanelProps {
   data: PortfolioData;
   onSave: (newData: PortfolioData) => void;
@@ -13,7 +45,7 @@ type TabType = 'perfil' | 'hero' | 'portfolio' | 'metrics' | 'services' | 'plans
 
 export default function EditorPanel({ data, onSave, onReset, onClose }: EditorPanelProps) {
   const [activeTab, setActiveTab] = useState<TabType>('perfil');
-  const [editedData, setEditedData] = useState<PortfolioData>(JSON.parse(JSON.stringify(data)));
+  const [editedData, setEditedData] = useState<PortfolioData>(cleanPortfolioData(data));
   const [copySuccess, setCopySuccess] = useState(false);
   const [copyDataSuccess, setCopyDataSuccess] = useState(false);
   const [uploadingField, setUploadingField] = useState<{ idx: number; type: 'image' | 'video' } | null>(null);
@@ -247,6 +279,7 @@ export default function EditorPanel({ data, onSave, onReset, onClose }: EditorPa
   };
 
   const handleProjectImageChange = (projIdx: number, imgIdx: number, value: string) => {
+    const cleanedValue = cleanImageUrl(value);
     const newProjects = [...editedData.projects];
     const proj = { ...newProjects[projIdx] };
     const currentImages = proj.imageUrls ? [...proj.imageUrls] : [];
@@ -258,7 +291,7 @@ export default function EditorPanel({ data, onSave, onReset, onClose }: EditorPa
       currentImages.push('');
     }
     
-    currentImages[imgIdx] = value;
+    currentImages[imgIdx] = cleanedValue;
     
     proj.imageUrls = currentImages.filter(Boolean);
     proj.imageUrl = currentImages[0] || '';
@@ -293,11 +326,15 @@ export default function EditorPanel({ data, onSave, onReset, onClose }: EditorPa
   };
 
   const handleProfileChange = (key: string, value: string) => {
+    let processedValue = value;
+    if (key === 'logoUrl' || key === 'profilePhotoUrl') {
+      processedValue = cleanImageUrl(value);
+    }
     setEditedData((prev) => ({
       ...prev,
       profile: {
         ...prev.profile,
-        [key]: value,
+        [key]: processedValue,
       },
     }));
   };
@@ -499,32 +536,6 @@ export default function EditorPanel({ data, onSave, onReset, onClose }: EditorPa
         </button>
       </div>
 
-      {/* Vercel / GitHub Integration Help Alert */}
-      <div className="mx-6 mt-4 p-4 bg-amber-500/10 border border-amber-500/20 rounded-xl text-xs text-[var(--text)] flex flex-col gap-3">
-        <div className="flex items-start gap-2.5">
-          <span className="text-amber-500 text-sm mt-0.5" role="img" aria-label="Alerta">⚠️</span>
-          <div>
-            <p className="font-bold text-amber-700 dark:text-amber-300">¿Cómo aplicar los cambios en tu web publicada?</p>
-            <p className="text-[var(--muted)] font-semibold mt-1 leading-relaxed">
-              Vercel compila tu web directamente desde <strong>GitHub</strong>. Los cambios que haces aquí se guardan localmente en tu navegador y en el workspace temporal, pero para que el público general los vea en tu dominio de Vercel, debes actualizar el archivo original del código.
-            </p>
-          </div>
-        </div>
-        <div className="flex flex-wrap gap-2 pt-2 border-t border-amber-500/10">
-          <button
-            onClick={handleDownloadDefaultData}
-            className="px-3 py-2 bg-amber-500 hover:bg-amber-600 text-white rounded-lg text-[11px] font-bold cursor-pointer transition-all flex items-center gap-1.5 shadow-sm"
-          >
-            📥 Descargar initialPortfolioData.ts
-          </button>
-          <button
-            onClick={handleCopyDefaultData}
-            className="px-3 py-2 bg-[var(--surface)] border border-[var(--line)] text-[var(--text)] hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg text-[11px] font-bold cursor-pointer transition-all flex items-center gap-1.5"
-          >
-            {copyDataSuccess ? '✅ Código Copiado' : '📋 Copiar Código'}
-          </button>
-        </div>
-      </div>
 
       {/* Tabs list */}
       <div className="flex border-b border-[var(--line)] overflow-x-auto scrollbar-none px-4 py-2 gap-1 bg-slate-50/50 dark:bg-slate-900/20">
@@ -588,10 +599,9 @@ export default function EditorPanel({ data, onSave, onReset, onClose }: EditorPa
 
               {/* Logo de Marca Local Uploader */}
               <div className="flex flex-col gap-1.5 col-span-2 border-t border-[var(--line)] pt-4 mt-1">
-                <label className="text-xs font-bold text-[var(--text)]">Logo de Marca (Imagen)</label>
-                <p className="text-[11px] text-[var(--muted)] mb-1">
-                  Sube una imagen para tu logo (se guardará de forma local en <code className="bg-slate-100 dark:bg-slate-800 px-1 py-0.5 rounded text-[10px]">public/images/logo</code>). Si no subes nada, se usarán las iniciales anteriores.
-                </p>
+                <label className="text-xs font-bold text-[var(--text)]">
+                  Logo de Marca (Imagen)
+                </label>
                 
                 <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center bg-[var(--surface-2)] p-4 rounded-2xl border border-[var(--line)]">
                   {/* Vista previa actual */}
@@ -668,10 +678,9 @@ export default function EditorPanel({ data, onSave, onReset, onClose }: EditorPa
 
               {/* Foto de Perfil Local Uploader */}
               <div className="flex flex-col gap-1.5 col-span-2 border-t border-[var(--line)] pt-4 mt-1">
-                <label className="text-xs font-bold text-[var(--text)]">Foto de Perfil del Celular (Imagen)</label>
-                <p className="text-[11px] text-[var(--muted)] mb-1">
-                  Sube una foto de perfil real para la sección interactiva del celular (se guardará en <code className="bg-slate-100 dark:bg-slate-800 px-1 py-0.5 rounded text-[10px]">public/images/perfil</code>).
-                </p>
+                <label className="text-xs font-bold text-[var(--text)]">
+                  Foto de Perfil del Celular (Imagen)
+                </label>
                 
                 <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center bg-[var(--surface-2)] p-4 rounded-2xl border border-[var(--line)]">
                   {/* Vista previa actual */}
@@ -979,12 +988,11 @@ export default function EditorPanel({ data, onSave, onReset, onClose }: EditorPa
                     {/* Carrusel de Imágenes de la Pieza (Máximo 3) */}
                     <div className="flex flex-col gap-2 col-span-2 border-t border-[var(--line)] pt-4 mt-2">
                       <div className="flex items-center justify-between">
-                        <label className="text-xs font-bold text-[var(--text)]">Imágenes de la Galería / Carrusel (Hasta 3)</label>
-                        <span className="text-[10px] text-[var(--muted)] font-black uppercase tracking-wider bg-[var(--primary-soft)] text-[var(--primary)] px-2 py-0.5 rounded-full">Rotación automática cada 4s</span>
+                        <label className="text-xs font-bold text-[var(--text)]">
+                          Imágenes de la Galería / Carrusel (Hasta 3)
+                        </label>
+                        <span className="text-[10px] text-[var(--muted)] font-black uppercase tracking-wider bg-[var(--primary-soft)] text-[var(--primary)] px-2 py-0.5 rounded-full">Rotación automática cada 8s</span>
                       </div>
-                      <p className="text-[11px] text-[var(--muted)] mb-1">
-                        Sube hasta 3 imágenes locales (se guardarán en el servidor) o ingresa URLs remotas. Si solo subes una, se mostrará como estática.
-                      </p>
                       
                       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                         {[0, 1, 2].map((imgIdx) => {
@@ -994,8 +1002,6 @@ export default function EditorPanel({ data, onSave, onReset, onClose }: EditorPa
                           if (imgIdx === 0 && !imgUrl && project.imageUrl) {
                             imgUrl = project.imageUrl;
                           }
-
-                          const isUploadingThis = uploadingProjImg?.idx === idx && uploadingProjImg?.imgIdx === imgIdx;
 
                           return (
                             <div key={imgIdx} className="p-3 bg-[var(--surface-2)] border border-[var(--line)] rounded-2xl flex flex-col gap-2 relative shadow-sm">
@@ -1025,13 +1031,7 @@ export default function EditorPanel({ data, onSave, onReset, onClose }: EditorPa
                                     }}
                                   />
                                 ) : (
-                                  <span className="text-[10px] text-[var(--muted)] font-bold uppercase tracking-wider">Vacío</span>
-                                )}
-
-                                {isUploadingThis && (
-                                  <div className="absolute inset-0 bg-black/50 backdrop-blur-xs flex items-center justify-center">
-                                    <Loader2 className="w-5 h-5 text-white animate-spin" />
-                                  </div>
+                                  <span className="text-[10px] text-[var(--muted)] font-bold uppercase tracking-wider">Sin URL</span>
                                 )}
                               </div>
 
@@ -1040,25 +1040,9 @@ export default function EditorPanel({ data, onSave, onReset, onClose }: EditorPa
                                 type="text"
                                 value={imgUrl}
                                 onChange={(e) => handleProjectImageChange(idx, imgIdx, e.target.value)}
-                                placeholder="URL remota o ruta"
-                                className="w-full px-2 py-1 border border-[var(--line)] rounded-xl text-[11px] bg-[var(--surface)] text-[var(--text)] outline-none focus:border-[var(--primary)] font-semibold"
+                                placeholder="Pegar URL de la imagen (http...)"
+                                className="w-full px-2 py-2 border border-[var(--line)] rounded-xl text-[11px] bg-[var(--surface)] text-[var(--text)] outline-none focus:border-[var(--primary)] font-semibold transition-all"
                               />
-
-                              {/* Upload local image trigger */}
-                              <label className="flex items-center justify-center gap-1 py-1.5 px-2 rounded-xl border border-dashed border-[var(--primary)]/60 bg-[var(--primary-soft)]/20 hover:bg-[var(--primary-soft)]/40 text-[10px] font-black text-[var(--primary)] transition-all cursor-pointer hover:border-solid hover:shadow-xs">
-                                <Upload className="w-3 h-3" />
-                                <span>Subir Imagen</span>
-                                <input
-                                  type="file"
-                                  accept="image/*"
-                                  className="hidden"
-                                  disabled={uploadingProjImg !== null}
-                                  onChange={(e) => {
-                                    const file = e.target.files?.[0];
-                                    if (file) handleProjectImageUpload(idx, imgIdx, file);
-                                  }}
-                                />
-                              </label>
                             </div>
                           );
                         })}

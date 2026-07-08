@@ -160,7 +160,7 @@ export default function Portfolio({ projects }: PortfolioProps) {
                 </div>
 
                 {/* Quick preview overlay */}
-                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-all duration-300 pointer-events-none">
+                <div className="absolute inset-0 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-all duration-300 pointer-events-none">
                   <span className="inline-flex items-center gap-1.5 px-4 py-2 bg-white text-slate-900 rounded-full text-xs font-black shadow-lg">
                     <Eye className="w-3.5 h-3.5" /> Ver Detalle
                   </span>
@@ -208,7 +208,7 @@ export default function Portfolio({ projects }: PortfolioProps) {
           onClick={() => setSelectedProject(null)}
         >
           <div 
-            className="relative w-full max-w-2xl my-auto max-h-[90vh] md:max-h-[85vh] flex flex-col overflow-hidden rounded-[32px] border border-[var(--line)] bg-[var(--surface)] shadow-2xl animate-scale-in"
+            className="relative w-full max-w-3xl my-auto max-h-[96vh] sm:max-h-[92vh] flex flex-col overflow-hidden rounded-[32px] border border-[var(--line)] bg-[var(--surface)] shadow-2xl animate-scale-in"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header / Top actions */}
@@ -223,7 +223,7 @@ export default function Portfolio({ projects }: PortfolioProps) {
             </div>
 
             {/* Media Area (Video/Image) */}
-            <div className="relative bg-slate-950 aspect-video max-h-[40vh] w-full flex-shrink-0 flex items-center justify-center overflow-hidden border-b border-[var(--line)]">
+            <div className="relative bg-slate-950 aspect-video max-h-[32vh] sm:max-h-[38vh] w-full flex-shrink-0 flex items-center justify-center overflow-hidden border-b border-[var(--line)]">
               {selectedProject.videoUrl ? (
                 // Video rendering
                 (() => {
@@ -252,7 +252,7 @@ export default function Portfolio({ projects }: PortfolioProps) {
                 })()
               ) : (selectedProject.imageUrl || (selectedProject.imageUrls && selectedProject.imageUrls.length > 0)) ? (
                 // Image rendering
-                <ProjectCarousel project={selectedProject} />
+                <ProjectCarousel project={selectedProject} enableZoom={true} />
               ) : (
                 // Beautiful gradient default with media info
                 <div className={`absolute inset-0 bg-gradient-to-br ${getGradientClass(selectedProject.colorType)} flex flex-col items-center justify-center p-8 text-center`}>

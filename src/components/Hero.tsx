@@ -1,5 +1,5 @@
 import React from 'react';
-import { ArrowRight, Sparkles, Play, ArrowUpRight, CheckCircle2 } from 'lucide-react';
+import { ArrowRight, Sparkles, Play, ArrowUpRight, CheckCircle2, Wand2, Zap } from 'lucide-react';
 import { HeroInfo, ProfileInfo } from '../types';
 import Logo from './Logo';
 
@@ -219,6 +219,32 @@ export default function Hero({ hero, profile }: HeroProps) {
               <span className="text-left leading-none">
                 <b className="block text-sm font-bold tracking-tight text-[var(--text)]">Estrategia</b>
                 <span className="text-[var(--muted)] text-xs font-semibold">Pilares y calendario</span>
+              </span>
+            </div>
+
+            <div
+              className="absolute flex items-center gap-3 p-3.5 border border-[var(--line)] rounded-2xl bg-[var(--surface)] shadow-md backdrop-blur-lg animate-float-custom top-[24%] right-[-50px] sm:right-[-90px] md:right-[-115px]"
+              style={{ '--r': '2.5deg', 'animationDelay': '-1s' } as React.CSSProperties}
+            >
+              <span className="w-10 h-10 rounded-xl flex items-center justify-center text-white bg-gradient-to-br from-[var(--primary)] to-[var(--secondary)] font-bold animate-pulse">
+                <Zap className="w-4 h-4 text-amber-300 fill-amber-300" />
+              </span>
+              <span className="text-left leading-none">
+                <b className="block text-sm font-bold tracking-tight text-[var(--text)]">Método WOW</b>
+                <span className="text-[var(--muted)] text-xs font-semibold">diseño que impacta</span>
+              </span>
+            </div>
+
+            <div
+              className="absolute flex items-center gap-3 p-3.5 border border-[var(--line)] rounded-2xl bg-[var(--surface)] shadow-md backdrop-blur-lg animate-float-custom top-[42%] left-[-15px] sm:left-[-25px]"
+              style={{ '--r': '-1.5deg', 'animationDelay': '-3s' } as React.CSSProperties}
+            >
+              <span className="w-10 h-10 rounded-xl flex items-center justify-center text-white bg-gradient-to-br from-[var(--primary)] to-[var(--secondary)] font-bold">
+                <Wand2 className="w-4 h-4" />
+              </span>
+              <span className="text-left leading-none">
+                <b className="block text-sm font-bold tracking-tight text-[var(--text)]">Alquimia Visual</b>
+                <span className="text-[var(--muted)] text-xs font-semibold">transformación fotográfica</span>
               </span>
             </div>
 

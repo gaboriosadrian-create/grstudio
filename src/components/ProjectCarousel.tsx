@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { Project } from '../types';
+import { Maximize2, X, ZoomIn } from 'lucide-react';
 
 interface ProjectCarouselProps {
   project: Project;
   className?: string;
+  enableZoom?: boolean;
 }
 
-export default function ProjectCarousel({ project, className = "absolute inset-0 w-full h-full" }: ProjectCarouselProps) {
+export default function ProjectCarousel({ project, className = "absolute inset-0 w-full h-full", enableZoom = false }: ProjectCarouselProps) {
   // Extract all valid images
   const images = React.useMemo(() => {
     const list: string[] = [];
@@ -25,6 +27,7 @@ export default function ProjectCarousel({ project, className = "absolute inset-0
   }, [project.imageUrls, project.imageUrl]);
 
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [isFullscreenOpen, setIsFullscreenOpen] = useState(false);
 
   useEffect(() => {
     if (images.length <= 1) {
@@ -32,12 +35,15 @@ export default function ProjectCarousel({ project, className = "absolute inset-0
       return;
     }
 
+    // Only auto-rotate if fullscreen lightbox is not open
+    if (isFullscreenOpen) return;
+
     const interval = setInterval(() => {
       setCurrentIndex((prevIndex) => (prevIndex + 1) % images.length);
-    }, 4000); // Shift every 4 seconds
+    }, 8000); // Shift every 8 seconds
 
     return () => clearInterval(interval);
-  }, [images]);
+  }, [images, isFullscreenOpen]);
 
   if (images.length === 0) {
     return null;
@@ -52,14 +58,34 @@ export default function ProjectCarousel({ project, className = "absolute inset-0
             key={`${img}-${index}`}
             src={img}
             alt={`${project.title} - imagen ${index + 1}`}
-            className="absolute inset-0 w-full h-full object-cover animate-fade-in"
+            className={`absolute inset-0 w-full h-full object-cover animate-fade-in ${enableZoom ? 'cursor-zoom-in' : ''}`}
             referrerPolicy="no-referrer"
+            onClick={enableZoom ? (e) => {
+              e.stopPropagation();
+              setIsFullscreenOpen(true);
+            } : undefined}
             onError={(e) => {
               (e.target as HTMLImageElement).src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><rect width="100" height="100" fill="%23f1f5f9"/><text x="50" y="55" font-family="sans-serif" font-size="9" fill="%2364748b" text-anchor="middle">Error al cargar</text></svg>';
             }}
           />
         );
       })}
+
+      {/* Full screen maximize button */}
+      {enableZoom && (
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            setIsFullscreenOpen(true);
+          }}
+          className="absolute top-3 left-3 z-30 flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-black/60 hover:bg-black/85 text-white text-[11px] font-bold border border-white/10 transition-all duration-200 cursor-pointer shadow-md backdrop-blur-sm"
+          title="Ver imagen en tamaño completo"
+        >
+          <ZoomIn className="w-3.5 h-3.5" />
+          <span>Pantalla completa</span>
+        </button>
+      )}
 
       {/* Slide Indicators */}
       {images.length > 1 && (
@@ -80,6 +106,67 @@ export default function ProjectCarousel({ project, className = "absolute inset-0
               title={`Ver imagen ${index + 1}`}
             />
           ))}
+        </div>
+      )}
+
+      {/* Fullscreen Lightbox / Zoom Overlay */}
+      {isFullscreenOpen && (
+        <div
+          className="fixed inset-0 z-[100] flex flex-col items-center justify-center p-4 bg-black/95 backdrop-blur-md animate-fade-in"
+          onClick={(e) => {
+            e.stopPropagation();
+            setIsFullscreenOpen(false);
+          }}
+        >
+          {/* Top action header */}
+          <div className="absolute top-4 right-4 z-[110] flex items-center gap-3">
+            <span className="text-white/60 text-xs font-semibold bg-white/10 px-3 py-1.5 rounded-full select-none">
+              Imagen {currentIndex + 1} de {images.length}
+            </span>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                setIsFullscreenOpen(false);
+              }}
+              className="p-2.5 rounded-full bg-white/10 text-white hover:bg-white/20 border border-white/10 transition-colors cursor-pointer"
+              title="Cerrar vista completa"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+
+          {/* Full Screen Image Container */}
+          <div className="relative max-w-full max-h-[85vh] flex items-center justify-center select-none" onClick={(e) => e.stopPropagation()}>
+            <img
+              src={images[currentIndex]}
+              alt={`${project.title} - pantalla completa`}
+              className="max-w-full max-h-[85vh] object-contain rounded-xl shadow-2xl border border-white/5 animate-scale-in"
+              referrerPolicy="no-referrer"
+            />
+          </div>
+
+          {/* Lightbox Navigation inside overlay if multiple images */}
+          {images.length > 1 && (
+            <div className="mt-6 flex items-center gap-4 z-[110]" onClick={(e) => e.stopPropagation()}>
+              <button
+                type="button"
+                onClick={() => setCurrentIndex((prev) => (prev - 1 + images.length) % images.length)}
+                className="px-4 py-2 bg-white/10 hover:bg-white/25 border border-white/10 text-white rounded-xl text-xs font-bold cursor-pointer transition-colors"
+              >
+                Anterior
+              </button>
+              <span className="text-white/80 text-xs font-mono">
+                {currentIndex + 1} / {images.length}
+              </span>
+              <button
+                type="button"
+                onClick={() => setCurrentIndex((prev) => (prev + 1) % images.length)}
+                className="px-4 py-2 bg-white/10 hover:bg-white/25 border border-white/10 text-white rounded-xl text-xs font-bold cursor-pointer transition-colors"
+              >
+                Siguiente
+              </button>
+            </div>
+          )}
         </div>
       )}
     </div>
