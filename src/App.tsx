@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Mail, MessageCircle, ExternalLink, Sparkles, Check, Copy } from 'lucide-react';
 import { defaultPortfolioData } from './initialPortfolioData';
 import { PortfolioData } from './types';
@@ -125,7 +125,7 @@ export default function App() {
   };
 
   // Portfolio data actions
-  const handleSaveData = (newData: PortfolioData) => {
+  const handleSaveData = useCallback((newData: PortfolioData) => {
     setData(newData);
     
     // Save to IndexedDB (asynchronous, robust, no 5MB limit)
@@ -162,7 +162,7 @@ export default function App() {
     } catch (e) {
       console.warn('El tamaño de los datos excede el límite de localStorage. Guardado solo en IndexedDB de forma segura.');
     }
-  };
+  }, []);
 
   const handleResetData = () => {
     setData(defaultPortfolioData);

@@ -45,7 +45,7 @@ type TabType = 'perfil' | 'hero' | 'portfolio' | 'metrics' | 'services' | 'plans
 
 export default function EditorPanel({ data, onSave, onReset, onClose }: EditorPanelProps) {
   const [activeTab, setActiveTab] = useState<TabType>('perfil');
-  const [editedData, setEditedData] = useState<PortfolioData>(cleanPortfolioData(data));
+  const [editedData, setEditedData] = useState<PortfolioData>(() => cleanPortfolioData(data));
   const [copySuccess, setCopySuccess] = useState(false);
   const [copyDataSuccess, setCopyDataSuccess] = useState(false);
   const [uploadingField, setUploadingField] = useState<{ idx: number; type: 'image' | 'video' } | null>(null);
@@ -54,10 +54,16 @@ export default function EditorPanel({ data, onSave, onReset, onClose }: EditorPa
   const [uploadingProjImg, setUploadingProjImg] = useState<{ idx: number; imgIdx: number } | null>(null);
   const [uploadError, setUploadError] = useState<string | null>(null);
 
+  // Keep a stable ref of onSave to prevent infinite re-render loops when parent updates
+  const onSaveRef = React.useRef(onSave);
+  React.useEffect(() => {
+    onSaveRef.current = onSave;
+  }, [onSave]);
+
   // Sync edits to parent in real-time for live preview (including uploaded files)
   React.useEffect(() => {
-    onSave(editedData);
-  }, [editedData, onSave]);
+    onSaveRef.current(editedData);
+  }, [editedData]);
 
   const convertToBase64 = (file: File): Promise<string> => {
     return new Promise((resolve, reject) => {
