@@ -163,7 +163,7 @@ async function startServer() {
     }
   });
 
-  // API Route: Save Portfolio Data back to local defaultData.ts (enables persistent changes for Vercel deploys)
+  // API Route: Save Portfolio Data back to local initialPortfolioData.ts (enables persistent changes for Vercel deploys)
   app.post("/api/save-portfolio-data", (req, res) => {
     try {
       const data = req.body;
@@ -172,15 +172,15 @@ async function startServer() {
         return;
       }
       
-      const filePath = path.join(process.cwd(), "src", "defaultData.ts");
+      const filePath = path.join(process.cwd(), "src", "initialPortfolioData.ts");
       const fileContent = `import { PortfolioData } from './types';\n\nexport const defaultPortfolioData: PortfolioData = ${JSON.stringify(data, null, 2)};\n`;
       
       fs.writeFileSync(filePath, fileContent, "utf-8");
-      console.log("Sincronizado correctamente defaultData.ts con los nuevos cambios.");
+      console.log("Sincronizado correctamente initialPortfolioData.ts con los nuevos cambios.");
       res.json({ success: true });
     } catch (error: any) {
-      console.error("Error al escribir defaultData.ts:", error);
-      res.status(500).json({ error: error.message || "Error al escribir defaultData.ts" });
+      console.error("Error al escribir initialPortfolioData.ts:", error);
+      res.status(500).json({ error: error.message || "Error al escribir initialPortfolioData.ts" });
     }
   });
 

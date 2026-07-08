@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Mail, MessageCircle, ExternalLink, Sparkles, Check, Copy } from 'lucide-react';
-import { defaultPortfolioData } from './defaultData';
+import { defaultPortfolioData } from './initialPortfolioData';
 import { PortfolioData } from './types';
 import { savePortfolioData, loadPortfolioData, deletePortfolioData } from './db';
 
@@ -137,7 +137,7 @@ export default function App() {
         console.error('Error al guardar datos en IndexedDB:', err);
       });
 
-    // Sincronizar con el servidor de desarrollo para actualizar defaultData.ts en el workspace local
+    // Sincronizar con el servidor de desarrollo para actualizar initialPortfolioData.ts en el workspace local
     fetch('/api/save-portfolio-data', {
       method: 'POST',
       headers: {
@@ -147,13 +147,13 @@ export default function App() {
     })
       .then((res) => {
         if (res.ok) {
-          console.log('Sincronización con defaultData.ts exitosa. Los cambios persistirán en el próximo deploy de producción.');
+          console.log('Sincronización con initialPortfolioData.ts exitosa. Los cambios persistirán en el próximo deploy de producción.');
         } else {
-          console.warn('No se pudo sincronizar defaultData.ts (esto es normal si estás en producción en Vercel y no tienes servidor backend de escritura).');
+          console.warn('No se pudo sincronizar initialPortfolioData.ts (esto es normal si estás en producción en Vercel y no tienes servidor backend de escritura).');
         }
       })
       .catch((err) => {
-        console.warn('No se pudo contactar con el servidor local para guardar en defaultData.ts:', err);
+        console.warn('No se pudo contactar con el servidor local para guardar en initialPortfolioData.ts:', err);
       });
 
     // Mirror to localStorage as a fallback if size allows

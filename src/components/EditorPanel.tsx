@@ -433,7 +433,7 @@ export default function EditorPanel({ data, onSave, onReset, onClose }: EditorPa
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.setAttribute('download', 'defaultData.ts');
+      link.setAttribute('download', 'initialPortfolioData.ts');
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -515,7 +515,7 @@ export default function EditorPanel({ data, onSave, onReset, onClose }: EditorPa
             onClick={handleDownloadDefaultData}
             className="px-3 py-2 bg-amber-500 hover:bg-amber-600 text-white rounded-lg text-[11px] font-bold cursor-pointer transition-all flex items-center gap-1.5 shadow-sm"
           >
-            📥 Descargar defaultData.ts
+            📥 Descargar initialPortfolioData.ts
           </button>
           <button
             onClick={handleCopyDefaultData}
