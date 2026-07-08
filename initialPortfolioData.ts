@@ -11,7 +11,7 @@ export const defaultPortfolioData: PortfolioData = {
     "instagram": "@gabrielriosok",
     "tiktok": "@tuusuario",
     "linkedin": "tuusuario",
-    "logoUrl": "/images/logo/logo_1783526590479_visual_creator.png",
+    "logoUrl": "public/images/logo/logo_1783457905492_visual_creator.png",
     "profilePhotoUrl": "/images/perfil/profile_1783527036387_mi_foto_real.png"
   },
   "hero": {
