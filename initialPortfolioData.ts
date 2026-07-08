@@ -11,8 +11,8 @@ export const defaultPortfolioData: PortfolioData = {
     "instagram": "@gabrielriosok",
     "tiktok": "@tuusuario",
     "linkedin": "tuusuario",
-    "logoUrl": "/images/logo/logo_1783457905492_visual_creator.png",
-    "profilePhotoUrl": "/images/perfil/profile_1783527036387_mi_foto_real.png"
+    "logoUrl": "https://raw.githubusercontent.com/gaboriosadrian-create/grstudio/main/public/images/logo/logo_1783457905492_visual_creator.png",
+    "profilePhotoUrl": "https://raw.githubusercontent.com/gaboriosadrian-create/grstudio/main/public/images/perfil/profile_1783527036387_mi_foto_real.png"
   },
   "hero": {
     "eyebrow": "Disponible para nuevos proyectos",
@@ -111,9 +111,9 @@ export const defaultPortfolioData: PortfolioData = {
       ],
       "videoUrl": "",
       "imageUrls": [
-        "/images/portfolio/portfolio_1783526665882_portfolio_1783458149488_vacaciones_de_invierno_reel1.mp4"
+        "https://raw.githubusercontent.com/gaboriosadrian-create/grstudio/main/public/images/portfolio/portfolio_1783526665882_portfolio_1783458149488_vacaciones_de_invierno_reel1.mp4"
       ],
-      "imageUrl": "/images/portfolio/portfolio_1783533443391_1.png"
+      "imageUrl": "https://raw.githubusercontent.com/gaboriosadrian-create/grstudio/main/public/images/portfolio/portfolio_1783533443391_1.png"
     },
     {
       "id": "p2",
@@ -129,11 +129,11 @@ export const defaultPortfolioData: PortfolioData = {
       "tags": [
         "Alquimia"
       ],
-      "imageUrl": "/images/portfolio/portfolio_1783457982196_whatsapp_image_2026_05_27_at_10_15_07.jpeg",
+      "imageUrl": "https://raw.githubusercontent.com/gaboriosadrian-create/grstudio/main/public/images/portfolio/portfolio_1783457982196_whatsapp_image_2026_05_27_at_10_15_07.jpeg",
       "imageUrls": [
-        "/images/portfolio/portfolio_1783457982196_whatsapp_image_2026_05_27_at_10_15_07.jpeg",
-        "/images/portfolio/portfolio_1783458014969_sandwichsdemonta__a.png",
-        "/images/portfolio/portfolio_1783457958698_1.png"
+        "https://raw.githubusercontent.com/gaboriosadrian-create/grstudio/main/public/images/portfolio/portfolio_1783457982196_whatsapp_image_2026_05_27_at_10_15_07.jpeg",
+        "https://raw.githubusercontent.com/gaboriosadrian-create/grstudio/main/public/images/portfolio/portfolio_1783458014969_sandwichsdemonta__a.png",
+        "https://raw.githubusercontent.com/gaboriosadrian-create/grstudio/main/public/images/portfolio/portfolio_1783457958698_1.png"
       ]
     },
     {
@@ -151,11 +151,11 @@ export const defaultPortfolioData: PortfolioData = {
         "Marca",
         "Estrategia"
       ],
-      "imageUrl": "/images/portfolio/portfolio_1783458238302_1.png",
+      "imageUrl": "https://raw.githubusercontent.com/gaboriosadrian-create/grstudio/main/public/images/portfolio/portfolio_1783458238302_1.png",
       "imageUrls": [
-        "/images/portfolio/portfolio_1783458238302_1.png",
-        "/images/portfolio/portfolio_1783526843636_portfolio_1783458212364_2.png",
-        "/images/portfolio/portfolio_1783526868491_branding_balc__n_del_r__o.png"
+        "https://raw.githubusercontent.com/gaboriosadrian-create/grstudio/main/public/images/portfolio/portfolio_1783458238302_1.png",
+        "https://raw.githubusercontent.com/gaboriosadrian-create/grstudio/main/public/images/portfolio/portfolio_1783526843636_portfolio_1783458212364_2.png",
+        "https://raw.githubusercontent.com/gaboriosadrian-create/grstudio/main/public/images/portfolio/portfolio_1783526868491_branding_balc__n_del_r__o.png"
       ]
     },
     {
@@ -173,11 +173,11 @@ export const defaultPortfolioData: PortfolioData = {
         "Bio",
         "Copy"
       ],
-      "imageUrl": "/images/portfolio/portfolio_1783526889641_portfolio_1783458297361_optimizarig.png",
+      "imageUrl": "https://raw.githubusercontent.com/gaboriosadrian-create/grstudio/main/public/images/portfolio/portfolio_1783526889641_portfolio_1783458297361_optimizarig.png",
       "imageUrls": [
-        "/images/portfolio/portfolio_1783526889641_portfolio_1783458297361_optimizarig.png",
-        "/images/portfolio/portfolio_1783526904813_portfolio_1783458323202_1.png",
-        "/images/portfolio/portfolio_1783526918132_portfolio_1783458338347_5.png"
+        "https://raw.githubusercontent.com/gaboriosadrian-create/grstudio/main/public/images/portfolio/portfolio_1783526889641_portfolio_1783458297361_optimizarig.png",
+        "https://raw.githubusercontent.com/gaboriosadrian-create/grstudio/main/public/images/portfolio/portfolio_1783526904813_portfolio_1783458323202_1.png",
+        "https://raw.githubusercontent.com/gaboriosadrian-create/grstudio/main/public/images/portfolio/portfolio_1783526918132_portfolio_1783458338347_5.png"
       ]
     },
     {
@@ -193,11 +193,11 @@ export const defaultPortfolioData: PortfolioData = {
       "tags": [
         "Método WOW"
       ],
-      "imageUrl": "/images/portfolio/portfolio_1783526943721_portfolio_1783458359969_slide_01.png",
+      "imageUrl": "https://raw.githubusercontent.com/gaboriosadrian-create/grstudio/main/public/images/portfolio/portfolio_1783526943721_portfolio_1783458359969_slide_01.png",
       "imageUrls": [
-        "/images/portfolio/portfolio_1783526943721_portfolio_1783458359969_slide_01.png",
-        "/images/portfolio/portfolio_1783526955543_portfolio_1783458379889_slide_02.png",
-        "/images/portfolio/portfolio_1783526966685_portfolio_1783458395288_slide_04.png"
+        "https://raw.githubusercontent.com/gaboriosadrian-create/grstudio/main/public/images/portfolio/portfolio_1783526943721_portfolio_1783458359969_slide_01.png",
+        "https://raw.githubusercontent.com/gaboriosadrian-create/grstudio/main/public/images/portfolio/portfolio_1783526955543_portfolio_1783458379889_slide_02.png",
+        "https://raw.githubusercontent.com/gaboriosadrian-create/grstudio/main/public/images/portfolio/portfolio_1783526966685_portfolio_1783458395288_slide_04.png"
       ]
     },
     {
@@ -215,11 +215,11 @@ export const defaultPortfolioData: PortfolioData = {
         "Diseño",
         "Copy"
       ],
-      "imageUrl": "/images/portfolio/portfolio_1783526988362_f1.png",
+      "imageUrl": "https://raw.githubusercontent.com/gaboriosadrian-create/grstudio/main/public/images/portfolio/portfolio_1783526988362_f1.png",
       "imageUrls": [
-        "/images/portfolio/portfolio_1783526988362_f1.png",
-        "/images/portfolio/portfolio_1783526999377_f2.png",
-        "/images/portfolio/portfolio_1783527011407_f6.png"
+        "https://raw.githubusercontent.com/gaboriosadrian-create/grstudio/main/public/images/portfolio/portfolio_1783526988362_f1.png",
+        "https://raw.githubusercontent.com/gaboriosadrian-create/grstudio/main/public/images/portfolio/portfolio_1783526999377_f2.png",
+        "https://raw.githubusercontent.com/gaboriosadrian-create/grstudio/main/public/images/portfolio/portfolio_1783527011407_f6.png"
       ]
     }
   ],
