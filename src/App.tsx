@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Mail, MessageCircle, ExternalLink, Sparkles, Check, Copy } from 'lucide-react';
 import { defaultPortfolioData } from './initialPortfolioData';
 import { PortfolioData } from './types';
@@ -21,6 +21,7 @@ export default function App() {
   const [isEditorOpen, setIsEditorOpen] = useState(false);
   const [copied, setCopied] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
+  const saveTimeoutRef = useRef<any>(null);
 
   // Initialize theme and portfolio data on load
   useEffect(() => {
@@ -126,42 +127,59 @@ export default function App() {
 
   // Portfolio data actions
   const handleSaveData = useCallback((newData: PortfolioData) => {
+    // 1. Update React state immediately for snappy real-time preview
     setData(newData);
     
-    // Save to IndexedDB (asynchronous, robust, no 5MB limit)
-    savePortfolioData(newData)
-      .then(() => {
-        console.log('Datos guardados correctamente en IndexedDB (soporta archivos pesados).');
-      })
-      .catch((err) => {
-        console.error('Error al guardar datos en IndexedDB:', err);
-      });
-
-    // Sincronizar con el servidor de desarrollo para actualizar initialPortfolioData.ts en el workspace local
-    fetch('/api/save-portfolio-data', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(newData),
-    })
-      .then((res) => {
-        if (res.ok) {
-          console.log('Sincronización con initialPortfolioData.ts exitosa. Los cambios persistirán en el próximo deploy de producción.');
-        } else {
-          console.warn('No se pudo sincronizar initialPortfolioData.ts (esto es normal si estás en producción en Vercel y no tienes servidor backend de escritura).');
-        }
-      })
-      .catch((err) => {
-        console.warn('No se pudo contactar con el servidor local para guardar en initialPortfolioData.ts:', err);
-      });
-
-    // Mirror to localStorage as a fallback if size allows
-    try {
-      localStorage.setItem('user_portfolio_data', JSON.stringify(newData));
-    } catch (e) {
-      console.warn('El tamaño de los datos excede el límite de localStorage. Guardado solo en IndexedDB de forma segura.');
+    // 2. Debounce heavy saving operations (IndexedDB, fetch, localStorage stringification)
+    if (saveTimeoutRef.current) {
+      clearTimeout(saveTimeoutRef.current);
     }
+
+    saveTimeoutRef.current = setTimeout(() => {
+      // Save to IndexedDB (asynchronous, robust, no 5MB limit)
+      savePortfolioData(newData)
+        .then(() => {
+          console.log('Datos guardados correctamente en IndexedDB.');
+        })
+        .catch((err) => {
+          console.error('Error al guardar datos en IndexedDB:', err);
+        });
+
+      // Avoid heavy operations if data is extremely large
+      try {
+        const dataStr = JSON.stringify(newData);
+
+        // Mirror to localStorage if size is within safe limits (under 4MB)
+        if (dataStr.length < 4000000) {
+          try {
+            localStorage.setItem('user_portfolio_data', dataStr);
+          } catch (e) {
+            console.warn('El tamaño de los datos excede el límite de localStorage. Guardado solo en IndexedDB.');
+          }
+        }
+
+        // Send API sync request if size is within limits (under 5MB)
+        if (dataStr.length < 5000000) {
+          fetch('/api/save-portfolio-data', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: dataStr,
+          })
+            .then((res) => {
+              if (res.ok) {
+                console.log('Sincronización con el servidor exitosa.');
+              }
+            })
+            .catch(() => {
+              // Silently ignore network failures on static deployments
+            });
+        }
+      } catch (err) {
+        console.error('Error al procesar datos del portafolio:', err);
+      }
+    }, 800); // 800ms debounce
   }, []);
 
   const handleResetData = () => {
