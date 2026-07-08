@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Mail, MessageCircle, ExternalLink, Sparkles, Check, Copy } from 'lucide-react';
 import { defaultPortfolioData } from './initialPortfolioData';
 import { PortfolioData } from './types';
@@ -13,28 +13,14 @@ import Portfolio from './components/Portfolio';
 import Process from './components/Process';
 import Pricing from './components/Pricing';
 import Contact from './components/Contact';
-
-// Lazy load the editor panel to prevent blocking UI thread on mount
-const EditorPanel = React.lazy(() => import('./components/EditorPanel'));
-
-// Helper to rewrite old GitHub raw or blob URLs to clean, local, relative paths that exist in /public
-export const mapUrlToLocal = (url: string): string => {
-  return url || '';
-};
-
-// Deeply cleans/sanitizes all image/video URLs within a PortfolioData object
-export const sanitizePortfolioData = (portfolio: PortfolioData): PortfolioData => {
-  return portfolio;
-};
+import EditorPanel from './components/EditorPanel';
 
 export default function App() {
-  const [data, setData] = useState<PortfolioData>(() => sanitizePortfolioData(defaultPortfolioData));
+  const [data, setData] = useState<PortfolioData>(defaultPortfolioData);
   const [isDark, setIsDark] = useState(false);
   const [isEditorOpen, setIsEditorOpen] = useState(false);
   const [copied, setCopied] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
-  const saveTimeoutRef = useRef<any>(null);
-  const previewTimeoutRef = useRef<any>(null);
 
   // Initialize theme and portfolio data on load
   useEffect(() => {
@@ -96,13 +82,13 @@ export default function App() {
     loadPortfolioData()
       .then((savedData) => {
         if (savedData) {
-          setData(sanitizePortfolioData(savedData));
+          setData(savedData);
         } else {
           // Fallback / Migrate from localStorage if it exists
           try {
             const legacyData = localStorage.getItem('user_portfolio_data');
             if (legacyData) {
-              const parsed = sanitizePortfolioData(JSON.parse(legacyData));
+              const parsed = JSON.parse(legacyData);
               setData(parsed);
               // Migrate it to IndexedDB so it's safely stored going forward
               savePortfolioData(parsed).catch(console.error);
@@ -118,7 +104,7 @@ export default function App() {
         try {
           const legacyData = localStorage.getItem('user_portfolio_data');
           if (legacyData) {
-            setData(sanitizePortfolioData(JSON.parse(legacyData)));
+            setData(JSON.parse(legacyData));
           }
         } catch (e) {
           // Ignore
@@ -139,75 +125,47 @@ export default function App() {
   };
 
   // Portfolio data actions
-  const handleSaveData = useCallback((newData: PortfolioData, immediate = false) => {
-    const sanitizedData = sanitizePortfolioData(newData);
-    // 1. Debounce or update parent React state immediately for real-time preview
-    if (previewTimeoutRef.current) {
-      clearTimeout(previewTimeoutRef.current);
-    }
-
-    if (immediate) {
-      setData(sanitizedData);
-    } else {
-      previewTimeoutRef.current = setTimeout(() => {
-        setData(sanitizedData);
-      }, 350); // 350ms debounce for live preview updates (renders whole app)
-    }
+  const handleSaveData = (newData: PortfolioData) => {
+    setData(newData);
     
-    // 2. Debounce heavy saving operations (IndexedDB, fetch, localStorage stringification)
-    if (saveTimeoutRef.current) {
-      clearTimeout(saveTimeoutRef.current);
+    // Save to IndexedDB (asynchronous, robust, no 5MB limit)
+    savePortfolioData(newData)
+      .then(() => {
+        console.log('Datos guardados correctamente en IndexedDB (soporta archivos pesados).');
+      })
+      .catch((err) => {
+        console.error('Error al guardar datos en IndexedDB:', err);
+      });
+
+    // Sincronizar con el servidor de desarrollo para actualizar initialPortfolioData.ts en el workspace local
+    fetch('/api/save-portfolio-data', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(newData),
+    })
+      .then((res) => {
+        if (res.ok) {
+          console.log('Sincronización con initialPortfolioData.ts exitosa. Los cambios persistirán en el próximo deploy de producción.');
+        } else {
+          console.warn('No se pudo sincronizar initialPortfolioData.ts (esto es normal si estás en producción en Vercel y no tienes servidor backend de escritura).');
+        }
+      })
+      .catch((err) => {
+        console.warn('No se pudo contactar con el servidor local para guardar en initialPortfolioData.ts:', err);
+      });
+
+    // Mirror to localStorage as a fallback if size allows
+    try {
+      localStorage.setItem('user_portfolio_data', JSON.stringify(newData));
+    } catch (e) {
+      console.warn('El tamaño de los datos excede el límite de localStorage. Guardado solo en IndexedDB de forma segura.');
     }
-
-    saveTimeoutRef.current = setTimeout(() => {
-      // Save to IndexedDB (asynchronous, robust, no 5MB limit)
-      savePortfolioData(sanitizedData)
-        .then(() => {
-          console.log('Datos guardados correctamente en IndexedDB.');
-        })
-        .catch((err) => {
-          console.error('Error al guardar datos en IndexedDB:', err);
-        });
-
-      // Avoid heavy operations if data is extremely large
-      try {
-        const dataStr = JSON.stringify(sanitizedData);
-
-        // Mirror to localStorage if size is within safe limits (under 4MB)
-        if (dataStr.length < 4000000) {
-          try {
-            localStorage.setItem('user_portfolio_data', dataStr);
-          } catch (e) {
-            console.warn('El tamaño de los datos excede el límite de localStorage. Guardado solo en IndexedDB.');
-          }
-        }
-
-        // Send API sync request if size is within limits (under 5MB)
-        if (dataStr.length < 5000000) {
-          fetch('/api/save-portfolio-data', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: dataStr,
-          })
-            .then((res) => {
-              if (res.ok) {
-                console.log('Sincronización con el servidor exitosa.');
-              }
-            })
-            .catch(() => {
-              // Silently ignore network failures on static deployments
-            });
-        }
-      } catch (err) {
-        console.error('Error al procesar datos del portafolio:', err);
-      }
-    }, 1000); // 1000ms debounce for storage & server sync
-  }, []);
+  };
 
   const handleResetData = () => {
-    setData(sanitizePortfolioData(defaultPortfolioData));
+    setData(defaultPortfolioData);
     deletePortfolioData()
       .then(() => {
         console.log('Datos de IndexedDB eliminados.');
@@ -261,11 +219,7 @@ export default function App() {
         profile={data.profile}
         isDark={isDark}
         toggleTheme={toggleTheme}
-        openEditor={() => {
-          React.startTransition(() => {
-            setIsEditorOpen(prev => !prev);
-          });
-        }}
+        openEditor={() => setIsEditorOpen(!isEditorOpen)}
         isEditorOpen={isEditorOpen}
         isAdmin={isAdmin}
       />
@@ -278,11 +232,7 @@ export default function App() {
             <span className="animate-pulse">✨</span>
             <span>¿Quieres personalizar este portfolio con tus datos? Haz clic en</span>
             <button
-              onClick={() => {
-                React.startTransition(() => {
-                  setIsEditorOpen(true);
-                });
-              }}
+              onClick={() => setIsEditorOpen(true)}
               className="underline font-bold text-amber-400 hover:text-amber-300 transition-colors cursor-pointer"
             >
               Editar Web
@@ -393,32 +343,12 @@ export default function App() {
             onClick={() => setIsEditorOpen(false)}
             className="fixed inset-0 bg-black/25 dark:bg-black/50 z-40 backdrop-blur-xs transition-opacity"
           />
-          <React.Suspense
-            fallback={
-              <div className="fixed inset-y-0 right-0 z-50 w-full max-w-lg bg-[var(--surface-solid)] border-l border-[var(--line)] shadow-2xl flex flex-col">
-                <div className="px-6 py-5 border-b border-[var(--line)] flex items-center justify-between">
-                  <div className="flex items-center gap-2.5">
-                    <span className="text-xl">🛠️</span>
-                    <div>
-                      <h3 className="font-display font-bold text-lg text-[var(--text)] leading-none">Editor de Contenido</h3>
-                      <p className="text-xs text-[var(--muted)] font-semibold mt-1">Cargando interfaz del editor...</p>
-                    </div>
-                  </div>
-                </div>
-                <div className="flex-grow flex flex-col items-center justify-center gap-3">
-                  <div className="w-8 h-8 rounded-full border-2 border-[var(--primary)] border-t-transparent animate-spin" />
-                  <span className="text-xs text-[var(--muted)] font-black uppercase tracking-wider">Cargando...</span>
-                </div>
-              </div>
-            }
-          >
-            <EditorPanel
-              data={data}
-              onSave={handleSaveData}
-              onReset={handleResetData}
-              onClose={() => setIsEditorOpen(false)}
-            />
-          </React.Suspense>
+          <EditorPanel
+            data={data}
+            onSave={handleSaveData}
+            onReset={handleResetData}
+            onClose={() => setIsEditorOpen(false)}
+          />
         </>
       )}
 

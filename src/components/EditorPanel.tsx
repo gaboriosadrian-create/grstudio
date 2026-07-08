@@ -2,19 +2,41 @@ import React, { useState } from 'react';
 import { X, Save, RotateCcw, Copy, Check, Users, Sparkles, Sliders, DollarSign, Award, Briefcase, Grid, Trash2, Plus, Upload, Loader2 } from 'lucide-react';
 import { PortfolioData, Project } from '../types';
 
-// Utility helper to convert GitHub web blob URLs to raw direct image URLs and map to local paths
+// Utility helper to convert GitHub web blob URLs to raw direct image URLs
 export const cleanImageUrl = (url: string): string => {
-  return url || '';
+  if (!url) return '';
+  let cleaned = url.trim();
+  // Check if it's a GitHub blob URL (e.g., github.com/.../blob/...)
+  if (cleaned.includes('github.com/') && cleaned.includes('/blob/')) {
+    cleaned = cleaned
+      .replace('github.com', 'raw.githubusercontent.com')
+      .replace('/blob/', '/');
+  }
+  return cleaned;
 };
 
 // Deep cleans all image URLs in the portfolio data object
 const cleanPortfolioData = (data: PortfolioData): PortfolioData => {
-  return data;
+  const copy = JSON.parse(JSON.stringify(data));
+  if (copy.profile) {
+    if (copy.profile.logoUrl) copy.profile.logoUrl = cleanImageUrl(copy.profile.logoUrl);
+    if (copy.profile.profilePhotoUrl) copy.profile.profilePhotoUrl = cleanImageUrl(copy.profile.profilePhotoUrl);
+  }
+  if (Array.isArray(copy.projects)) {
+    copy.projects = copy.projects.map((proj: any) => {
+      if (proj.imageUrl) proj.imageUrl = cleanImageUrl(proj.imageUrl);
+      if (Array.isArray(proj.imageUrls)) {
+        proj.imageUrls = proj.imageUrls.map((u: string) => cleanImageUrl(u));
+      }
+      return proj;
+    });
+  }
+  return copy;
 };
 
 interface EditorPanelProps {
   data: PortfolioData;
-  onSave: (newData: PortfolioData, immediate?: boolean) => void;
+  onSave: (newData: PortfolioData) => void;
   onReset: () => void;
   onClose: () => void;
 }
@@ -23,7 +45,7 @@ type TabType = 'perfil' | 'hero' | 'portfolio' | 'metrics' | 'services' | 'plans
 
 export default function EditorPanel({ data, onSave, onReset, onClose }: EditorPanelProps) {
   const [activeTab, setActiveTab] = useState<TabType>('perfil');
-  const [editedData, setEditedData] = useState<PortfolioData>(() => cleanPortfolioData(data));
+  const [editedData, setEditedData] = useState<PortfolioData>(cleanPortfolioData(data));
   const [copySuccess, setCopySuccess] = useState(false);
   const [copyDataSuccess, setCopyDataSuccess] = useState(false);
   const [uploadingField, setUploadingField] = useState<{ idx: number; type: 'image' | 'video' } | null>(null);
@@ -31,31 +53,11 @@ export default function EditorPanel({ data, onSave, onReset, onClose }: EditorPa
   const [uploadingProfile, setUploadingProfile] = useState(false);
   const [uploadingProjImg, setUploadingProjImg] = useState<{ idx: number; imgIdx: number } | null>(null);
   const [uploadError, setUploadError] = useState<string | null>(null);
-  const [isReady, setIsReady] = useState(false);
-
-  React.useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsReady(true);
-    }, 40);
-    return () => clearTimeout(timer);
-  }, []);
-
-  // Keep a stable ref of onSave to prevent infinite re-render loops when parent updates
-  const onSaveRef = React.useRef(onSave);
-  React.useEffect(() => {
-    onSaveRef.current = onSave;
-  }, [onSave]);
-
-  const isFirstMount = React.useRef(true);
 
   // Sync edits to parent in real-time for live preview (including uploaded files)
   React.useEffect(() => {
-    if (isFirstMount.current) {
-      isFirstMount.current = false;
-      return;
-    }
-    onSaveRef.current(editedData, false);
-  }, [editedData]);
+    onSave(editedData);
+  }, [editedData, onSave]);
 
   const convertToBase64 = (file: File): Promise<string> => {
     return new Promise((resolve, reject) => {
@@ -436,7 +438,7 @@ export default function EditorPanel({ data, onSave, onReset, onClose }: EditorPa
   };
 
   const handleSave = () => {
-    onSave(editedData, true);
+    onSave(editedData);
     onClose();
   };
 
@@ -485,33 +487,6 @@ export default function EditorPanel({ data, onSave, onReset, onClose }: EditorPa
     { id: 'services', label: 'Servicios', icon: <Briefcase className="w-4 h-4" /> },
     { id: 'plans', label: 'Planes', icon: <DollarSign className="w-4 h-4" /> },
   ];
-
-  if (!isReady) {
-    return (
-      <div className="fixed inset-y-0 right-0 z-50 w-full max-w-lg bg-[var(--surface-solid)] border-l border-[var(--line)] shadow-2xl flex flex-col transition-all duration-300">
-        {/* Header Panel */}
-        <div className="px-6 py-5 border-b border-[var(--line)] flex items-center justify-between bg-gradient-to-r from-[var(--primary-soft)] to-transparent">
-          <div className="flex items-center gap-2.5">
-            <span className="text-xl">🛠️</span>
-            <div>
-              <h3 className="font-display font-bold text-lg text-[var(--text)] leading-none">Editor de Contenido</h3>
-              <p className="text-xs text-[var(--muted)] font-semibold mt-1">Configura y personaliza tu portafolio en vivo</p>
-            </div>
-          </div>
-          <button
-            onClick={onClose}
-            className="w-8 h-8 rounded-full border border-[var(--line)] flex items-center justify-center hover:bg-red-500/10 hover:text-red-500 hover:border-red-500/20 transition-all cursor-pointer"
-          >
-            <X className="w-4 h-4" />
-          </button>
-        </div>
-        <div className="flex-grow flex flex-col items-center justify-center gap-3 bg-[var(--surface-solid)]">
-          <Loader2 className="w-8 h-8 text-[var(--primary)] animate-spin" />
-          <span className="text-xs text-[var(--muted)] font-black uppercase tracking-wider">Iniciando Editor...</span>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="fixed inset-y-0 right-0 z-50 w-full max-w-lg bg-[var(--surface-solid)] border-l border-[var(--line)] shadow-2xl flex flex-col transition-all duration-300">
