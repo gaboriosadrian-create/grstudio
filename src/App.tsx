@@ -1,0 +1,488 @@
+import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { Mail, MessageCircle, ExternalLink, Sparkles, Check, Copy } from 'lucide-react';
+import { defaultPortfolioData } from './initialPortfolioData';
+import { PortfolioData } from './types';
+import { savePortfolioData, loadPortfolioData, deletePortfolioData } from './db';
+
+// Subcomponents
+import Navbar from './components/Navbar';
+import Hero from './components/Hero';
+import Metrics from './components/Metrics';
+import Services from './components/Services';
+import Portfolio from './components/Portfolio';
+import Process from './components/Process';
+import Pricing from './components/Pricing';
+import Contact from './components/Contact';
+import EditorPanel from './components/EditorPanel';
+
+// Helper to rewrite old GitHub raw or blob URLs to clean, local, relative paths that exist in /public
+export const mapUrlToLocal = (url: string): string => {
+  if (!url) return '';
+  let cleaned = url.trim();
+
+  // Normalize github.com blob URLs to raw.githubusercontent.com
+  if (cleaned.includes('github.com/') && cleaned.includes('/blob/')) {
+    cleaned = cleaned
+      .replace('github.com', 'raw.githubusercontent.com')
+      .replace('/blob/', '/');
+  }
+
+  if (!cleaned.includes('raw.githubusercontent.com') && !cleaned.includes('github.com')) {
+    return cleaned;
+  }
+
+  // Extract the original filename, ignoring query params like ?raw=true
+  const urlParts = cleaned.split('/');
+  let filename = urlParts[urlParts.length - 1] || '';
+  filename = filename.split('?')[0].split('#')[0];
+
+  const mappings: { [key: string]: string } = {
+    // Logo
+    'logo_1783457905492_visual_creator.png': '/images/logo/logo_1783526590479_visual_creator.png',
+    'logo_1783432102544_visual_creator.png': '/images/logo/logo_1783526590479_visual_creator.png',
+    
+    // Project 1
+    'portfolio_1783533443391_1.png': '/images/portfolio/portfolio_1783533443391_1.png',
+    'portfolio_1783526665882_portfolio_1783458149488_vacaciones_de_invierno_reel1.mp4': '/images/portfolio/portfolio_1783526665882_portfolio_1783458149488_vacaciones_de_invierno_reel1.mp4',
+
+    // Project 2
+    'portfolio_1783457982196_whatsapp_image_2026_05_27_at_10_15_07.jpeg': '/images/portfolio/portfolio_1783526752066_portfolio_1783457982196_whatsapp_image_2026_05_27_at_10_15_07.jpeg',
+    'portfolio_1783458014969_sandwichsdemonta__a.png': '/images/portfolio/portfolio_1783526765515_portfolio_1783458014969_sandwichsdemonta__a.png',
+    'portfolio_1783457958698_1.png': '/images/portfolio/portfolio_1783526781479_portfolio_1783457958698_1.png',
+
+    // Project 3
+    'portfolio_1783458238302_1.png': '/images/portfolio/portfolio_1783526817754_portfolio_1783458238302_1.png',
+    'portfolio_1783458212364_2.png': '/images/portfolio/portfolio_1783526843636_portfolio_1783458212364_2.png',
+    'portfolio_1783458258825_3.png': '/images/portfolio/portfolio_1783526868491_branding_balc__n_del_r__o.png',
+
+    // Project 4
+    'portfolio_1783458297361_optimizarig.png': '/images/portfolio/portfolio_1783526889641_portfolio_1783458297361_optimizarig.png',
+    'portfolio_1783458323202_1.png': '/images/portfolio/portfolio_1783526904813_portfolio_1783458323202_1.png',
+    'portfolio_1783458338347_5.png': '/images/portfolio/portfolio_1783526918132_portfolio_1783458338347_5.png',
+
+    // Project 5
+    'portfolio_1783458359969_slide_01.png': '/images/portfolio/portfolio_1783526943721_portfolio_1783458359969_slide_01.png',
+    'portfolio_1783458379889_slide_02.png': '/images/portfolio/portfolio_1783526955543_portfolio_1783458379889_slide_02.png',
+    'portfolio_1783458395288_slide_04.png': '/images/portfolio/portfolio_1783526966685_portfolio_1783458395288_slide_04.png',
+
+    // Project 6
+    'f1.png': '/images/portfolio/portfolio_1783526988362_f1.png',
+    'f2.png': '/images/portfolio/portfolio_1783526999377_f2.png',
+    'f6.png': '/images/portfolio/portfolio_1783527011407_f6.png',
+  };
+
+  if (mappings[filename]) {
+    return mappings[filename];
+  }
+
+  // General fallback for raw.githubusercontent.com or github.com files containing '/public/'
+  if (cleaned.includes('/public/')) {
+    const publicIndex = cleaned.indexOf('/public/');
+    return cleaned.substring(publicIndex + 7);
+  }
+
+  return cleaned;
+};
+
+// Deeply cleans/sanitizes all image/video URLs within a PortfolioData object
+export const sanitizePortfolioData = (portfolio: PortfolioData): PortfolioData => {
+  if (!portfolio) return portfolio;
+  const clean = JSON.parse(JSON.stringify(portfolio));
+  
+  if (clean.profile) {
+    if (clean.profile.logoUrl) clean.profile.logoUrl = mapUrlToLocal(clean.profile.logoUrl);
+    if (clean.profile.profilePhotoUrl) clean.profile.profilePhotoUrl = mapUrlToLocal(clean.profile.profilePhotoUrl);
+  }
+  
+  if (Array.isArray(clean.projects)) {
+    clean.projects = clean.projects.map((proj: any) => {
+      if (proj.imageUrl) proj.imageUrl = mapUrlToLocal(proj.imageUrl);
+      if (proj.videoUrl) proj.videoUrl = mapUrlToLocal(proj.videoUrl);
+      if (Array.isArray(proj.imageUrls)) {
+        proj.imageUrls = proj.imageUrls.map((url: string) => mapUrlToLocal(url));
+      }
+      return proj;
+    });
+  }
+  
+  return clean;
+};
+
+export default function App() {
+  const [data, setData] = useState<PortfolioData>(() => sanitizePortfolioData(defaultPortfolioData));
+  const [isDark, setIsDark] = useState(false);
+  const [isEditorOpen, setIsEditorOpen] = useState(false);
+  const [copied, setCopied] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const saveTimeoutRef = useRef<any>(null);
+  const previewTimeoutRef = useRef<any>(null);
+
+  // Initialize theme and portfolio data on load
+  useEffect(() => {
+    // 0. Set page title
+    try {
+      document.title = 'grstudio';
+    } catch (e) {
+      // ignore
+    }
+
+    // 1. Theme init
+    try {
+      const savedTheme = localStorage.getItem('theme');
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      const themeToSet = savedTheme === 'dark' || (!savedTheme && prefersDark);
+      setIsDark(themeToSet);
+      document.documentElement.setAttribute('data-theme', themeToSet ? 'dark' : 'light');
+    } catch (e) {
+      // Ignore
+    }
+
+    // 2. Admin / Editor visibility control
+    const checkAdminMode = () => {
+      try {
+        const hostname = window.location.hostname;
+        const searchParams = new URLSearchParams(window.location.search);
+        const hash = window.location.hash;
+
+        // Explicit URL parameter overrides
+        if (searchParams.get('edit') === 'true' || searchParams.get('admin') === 'true' || hash.includes('edit=true')) {
+          localStorage.setItem('isAdminMode', 'true');
+          return true;
+        }
+        if (searchParams.get('edit') === 'false' || searchParams.get('admin') === 'false') {
+          localStorage.removeItem('isAdminMode');
+          return false;
+        }
+
+        // Check persistent local storage
+        if (localStorage.getItem('isAdminMode') === 'true') {
+          return true;
+        }
+
+        // Automatically show on local development or AI Studio environments
+        const isDevHost = hostname === 'localhost' || 
+                          hostname === '127.0.0.1' || 
+                          hostname.includes('ais-dev-') || 
+                          hostname.includes('ais-pre-') ||
+                          hostname.endsWith('.run.app');
+        return isDevHost;
+      } catch (e) {
+        return false;
+      }
+    };
+
+    setIsAdmin(checkAdminMode());
+
+    // 3. Data init (IndexedDB is primary to handle large Base64 media files)
+    loadPortfolioData()
+      .then((savedData) => {
+        if (savedData) {
+          setData(sanitizePortfolioData(savedData));
+        } else {
+          // Fallback / Migrate from localStorage if it exists
+          try {
+            const legacyData = localStorage.getItem('user_portfolio_data');
+            if (legacyData) {
+              const parsed = sanitizePortfolioData(JSON.parse(legacyData));
+              setData(parsed);
+              // Migrate it to IndexedDB so it's safely stored going forward
+              savePortfolioData(parsed).catch(console.error);
+            }
+          } catch (e) {
+            // Ignore
+          }
+        }
+      })
+      .catch((err) => {
+        console.error('Error al cargar datos desde IndexedDB:', err);
+        // Fallback to localStorage on error
+        try {
+          const legacyData = localStorage.getItem('user_portfolio_data');
+          if (legacyData) {
+            setData(sanitizePortfolioData(JSON.parse(legacyData)));
+          }
+        } catch (e) {
+          // Ignore
+        }
+      });
+  }, []);
+
+  // Theme change handler
+  const toggleTheme = () => {
+    const nextTheme = !isDark;
+    setIsDark(nextTheme);
+    document.documentElement.setAttribute('data-theme', nextTheme ? 'dark' : 'light');
+    try {
+      localStorage.setItem('theme', nextTheme ? 'dark' : 'light');
+    } catch (e) {
+      // Ignore
+    }
+  };
+
+  // Portfolio data actions
+  const handleSaveData = useCallback((newData: PortfolioData, immediate = false) => {
+    const sanitizedData = sanitizePortfolioData(newData);
+    // 1. Debounce or update parent React state immediately for real-time preview
+    if (previewTimeoutRef.current) {
+      clearTimeout(previewTimeoutRef.current);
+    }
+
+    if (immediate) {
+      setData(sanitizedData);
+    } else {
+      previewTimeoutRef.current = setTimeout(() => {
+        setData(sanitizedData);
+      }, 350); // 350ms debounce for live preview updates (renders whole app)
+    }
+    
+    // 2. Debounce heavy saving operations (IndexedDB, fetch, localStorage stringification)
+    if (saveTimeoutRef.current) {
+      clearTimeout(saveTimeoutRef.current);
+    }
+
+    saveTimeoutRef.current = setTimeout(() => {
+      // Save to IndexedDB (asynchronous, robust, no 5MB limit)
+      savePortfolioData(sanitizedData)
+        .then(() => {
+          console.log('Datos guardados correctamente en IndexedDB.');
+        })
+        .catch((err) => {
+          console.error('Error al guardar datos en IndexedDB:', err);
+        });
+
+      // Avoid heavy operations if data is extremely large
+      try {
+        const dataStr = JSON.stringify(sanitizedData);
+
+        // Mirror to localStorage if size is within safe limits (under 4MB)
+        if (dataStr.length < 4000000) {
+          try {
+            localStorage.setItem('user_portfolio_data', dataStr);
+          } catch (e) {
+            console.warn('El tamaño de los datos excede el límite de localStorage. Guardado solo en IndexedDB.');
+          }
+        }
+
+        // Send API sync request if size is within limits (under 5MB)
+        if (dataStr.length < 5000000) {
+          fetch('/api/save-portfolio-data', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: dataStr,
+          })
+            .then((res) => {
+              if (res.ok) {
+                console.log('Sincronización con el servidor exitosa.');
+              }
+            })
+            .catch(() => {
+              // Silently ignore network failures on static deployments
+            });
+        }
+      } catch (err) {
+        console.error('Error al procesar datos del portafolio:', err);
+      }
+    }, 1000); // 1000ms debounce for storage & server sync
+  }, []);
+
+  const handleResetData = () => {
+    setData(sanitizePortfolioData(defaultPortfolioData));
+    deletePortfolioData()
+      .then(() => {
+        console.log('Datos de IndexedDB eliminados.');
+      })
+      .catch((err) => {
+        console.error('Error al eliminar de IndexedDB:', err);
+      });
+
+    try {
+      localStorage.removeItem('user_portfolio_data');
+    } catch (e) {
+      // Ignore
+    }
+  };
+
+  // General Copy Email action
+  const handleCopyEmailDirect = async () => {
+    try {
+      if (navigator.clipboard && window.isSecureContext) {
+        await navigator.clipboard.writeText(data.profile.email);
+      } else {
+        const textarea = document.createElement('textarea');
+        textarea.value = data.profile.email;
+        textarea.style.position = 'fixed';
+        textarea.style.opacity = '0';
+        document.body.appendChild(textarea);
+        textarea.focus();
+        textarea.select();
+        document.execCommand('copy');
+        textarea.remove();
+      }
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2200);
+    } catch (err) {
+      // Fallback
+    }
+  };
+
+  const whatsappUrl = `https://wa.me/${data.profile.phone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(data.profile.whatsappMessage)}`;
+
+  return (
+    <div className="min-h-screen flex flex-col selection:bg-[var(--primary)]/30 selection:text-[var(--text)]">
+      
+      {/* Skip to Content link */}
+      <a href="#contenido" className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[999] focus:px-5 focus:py-3 focus:rounded-full focus:bg-[var(--text)] focus:text-[var(--bg)] focus:font-black focus:shadow-xl focus:no-underline">
+        Saltar al contenido
+      </a>
+
+      {/* Navbar section */}
+      <Navbar
+        profile={data.profile}
+        isDark={isDark}
+        toggleTheme={toggleTheme}
+        openEditor={() => {
+          React.startTransition(() => {
+            setIsEditorOpen(prev => !prev);
+          });
+        }}
+        isEditorOpen={isEditorOpen}
+        isAdmin={isAdmin}
+      />
+
+      {/* Main Content Area */}
+      <main id="contenido" className="flex-grow">
+        {/* Banner informing users about the Live Editor */}
+        {isAdmin && (
+          <div className="bg-slate-900 text-white text-xs sm:text-sm font-semibold py-2.5 px-4 text-center border-b border-white/5 flex items-center justify-center gap-2">
+            <span className="animate-pulse">✨</span>
+            <span>¿Quieres personalizar este portfolio con tus datos? Haz clic en</span>
+            <button
+              onClick={() => {
+                React.startTransition(() => {
+                  setIsEditorOpen(true);
+                });
+              }}
+              className="underline font-bold text-amber-400 hover:text-amber-300 transition-colors cursor-pointer"
+            >
+              Editar Web
+            </button>
+            <span>en el menú superior.</span>
+          </div>
+        )}
+
+        {/* Hero Area */}
+        <Hero hero={data.hero} profile={data.profile} />
+
+        {/* Metrics Bar */}
+        <Metrics metrics={data.metrics} />
+
+        {/* Services Offerings */}
+        <Services services={data.services} />
+
+        {/* Dynamic Project Portfolio */}
+        <Portfolio projects={data.projects} />
+
+        {/* Delivery Process workflow */}
+        <Process steps={data.steps} />
+
+        {/* Prices & Subscription Packages */}
+        <Pricing plans={data.plans} />
+
+        {/* Contact Form Section */}
+        <Contact profile={data.profile} />
+      </main>
+
+      {/* Footer copyright and socials */}
+      <footer className="border-t border-[var(--line)] py-10 bg-transparent">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-6">
+          <p className="text-[var(--muted)] text-sm font-semibold text-center sm:text-left">
+            © {new Date().getFullYear()} {data.profile.name}. {data.profile.role}.
+          </p>
+          
+          <div className="flex flex-wrap justify-center gap-6" aria-label="Enlaces sociales">
+            <a
+              href={`https://instagram.com/${data.profile.instagram.replace('@', '')}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-sm font-bold text-[var(--muted)] hover:text-[var(--primary)] transition-colors flex items-center gap-1"
+            >
+              Instagram <ExternalLink className="w-3.5 h-3.5" />
+            </a>
+            {data.profile.tiktok && (
+              <a
+                href={`https://tiktok.com/${data.profile.tiktok}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-sm font-bold text-[var(--muted)] hover:text-[var(--primary)] transition-colors flex items-center gap-1"
+              >
+                TikTok <ExternalLink className="w-3.5 h-3.5" />
+              </a>
+            )}
+            <a
+              href={`https://linkedin.com/in/${data.profile.linkedin.trim().replace(/\s+/g, '-')}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-sm font-bold text-[var(--muted)] hover:text-[var(--primary)] transition-colors flex items-center gap-1"
+            >
+              LinkedIn <ExternalLink className="w-3.5 h-3.5" />
+            </a>
+          </div>
+        </div>
+      </footer>
+
+      {/* Quick Floating contact tools */}
+      <div className="fixed right-5 bottom-5 z-40 flex flex-col gap-2.5" aria-label="Contacto rápido">
+        {/* Copy email widget */}
+        <button
+          onClick={handleCopyEmailDirect}
+          className="w-13 h-13 rounded-full border border-[var(--line)] bg-[var(--surface)] text-[var(--text)] shadow-lg flex items-center justify-center hover:-translate-y-1 hover:border-[var(--primary)]/40 transition-all cursor-pointer"
+          aria-label="Copiar correo electrónico"
+        >
+          <Mail className="w-5 h-5" />
+        </button>
+
+        {/* WhatsApp direct launch */}
+        <a
+          href={whatsappUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="w-13 h-13 rounded-full border border-[#25d366] bg-[#25d366] text-white shadow-lg flex items-center justify-center hover:-translate-y-1 hover:shadow-xl transition-all"
+          aria-label="Contactar por WhatsApp"
+        >
+          <MessageCircle className="w-5 h-5 fill-white/10" />
+        </a>
+      </div>
+
+      {/* Direct copy confirmation feedback toast */}
+      <div
+        className={`fixed right-20 bottom-7 z-50 px-3.5 py-2 rounded-full bg-[var(--text)] text-[var(--bg)] text-xs font-black shadow-lg transition-all duration-300 pointer-events-none flex items-center gap-1.5 ${
+          copied ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'
+        }`}
+        role="status"
+        aria-live="polite"
+      >
+        <Check className="w-3.5 h-3.5 text-[var(--primary)]" /> Correo copiado
+      </div>
+
+      {/* Sliding Content Editor Side Panel */}
+      {isEditorOpen && (
+        <>
+          {/* Dark backdrop overlay when Editor is open */}
+          <div
+            onClick={() => setIsEditorOpen(false)}
+            className="fixed inset-0 bg-black/25 dark:bg-black/50 z-40 backdrop-blur-xs transition-opacity"
+          />
+          <EditorPanel
+            data={data}
+            onSave={handleSaveData}
+            onReset={handleResetData}
+            onClose={() => setIsEditorOpen(false)}
+          />
+        </>
+      )}
+
+    </div>
+  );
+}
