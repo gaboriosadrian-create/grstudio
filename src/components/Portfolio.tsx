@@ -119,7 +119,6 @@ export default function Portfolio({ projects }: PortfolioProps) {
                 {project.imageUrl || (project.imageUrls && project.imageUrls.length > 0) ? (
                   <>
                     <ProjectCarousel project={project} />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-black/30 transition-opacity duration-300 pointer-events-none" />
                   </>
                 ) : project.videoUrl ? (
                   <>
@@ -140,7 +139,6 @@ export default function Portfolio({ projects }: PortfolioProps) {
                         className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105 animate-fade-in"
                       />
                     )}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-black/30 transition-opacity duration-300 pointer-events-none" />
                   </>
                 ) : (
                   <>

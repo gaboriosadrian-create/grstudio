@@ -7,6 +7,14 @@ import { formatMediaUrl } from '../utils';
 export const cleanImageUrl = (url: string): string => {
   if (!url) return '';
   let cleaned = url.trim();
+
+  // If it's a URL pointing to our local folder structure (even hosted on GitHub/Vercel/etc.)
+  // convert it to the clean, local relative path
+  const localMatch = cleaned.match(/\/(?:public\/)?images\/(portfolio|perfil|logo)\/(.+)$/i);
+  if (localMatch) {
+    return `/images/${localMatch[1]}/${localMatch[2]}`;
+  }
+
   // Check if it's a GitHub blob URL (e.g., github.com/.../blob/...)
   if (cleaned.includes('github.com/') && cleaned.includes('/blob/')) {
     cleaned = cleaned
@@ -78,7 +86,10 @@ export default function EditorPanel({ data, onPreview, onSave, onReset, onClose 
     setUploadingField({ idx: index, type });
     setUploadError(null);
     try {
+      const proj = editedData.projects[index];
       const formData = new FormData();
+      formData.append('projectId', proj ? (proj.id || `index_${index}`) : `index_${index}`);
+      formData.append('fileType', type);
       formData.append('file', file);
 
       const response = await fetch('/api/upload', {
@@ -203,7 +214,10 @@ export default function EditorPanel({ data, onPreview, onSave, onReset, onClose 
     setUploadingProjImg({ idx: projIdx, imgIdx });
     setUploadError(null);
     try {
+      const proj = editedData.projects[projIdx];
       const formData = new FormData();
+      formData.append('projectId', proj ? (proj.id || `index_${projIdx}`) : `index_${projIdx}`);
+      formData.append('imageIndex', imgIdx.toString());
       formData.append('file', file);
 
       const response = await fetch('/api/upload', {
@@ -460,7 +474,7 @@ export default function EditorPanel({ data, onPreview, onSave, onReset, onClose 
 
   const handleCopyDefaultData = async () => {
     try {
-      const fileContent = `import { PortfolioData } from './types';\n\nexport const defaultPortfolioData: PortfolioData = ${JSON.stringify(editedData, null, 2)};\n`;
+      const fileContent = `import { PortfolioData } from './types.ts';\n\nexport const defaultPortfolioData: PortfolioData = ${JSON.stringify(editedData, null, 2)};\n`;
       await navigator.clipboard.writeText(fileContent);
       setCopyDataSuccess(true);
       setTimeout(() => setCopyDataSuccess(false), 2000);
@@ -471,7 +485,7 @@ export default function EditorPanel({ data, onPreview, onSave, onReset, onClose 
 
   const handleDownloadDefaultData = () => {
     try {
-      const fileContent = `import { PortfolioData } from './types';\n\nexport const defaultPortfolioData: PortfolioData = ${JSON.stringify(editedData, null, 2)};\n`;
+      const fileContent = `import { PortfolioData } from './types.ts';\n\nexport const defaultPortfolioData: PortfolioData = ${JSON.stringify(editedData, null, 2)};\n`;
       const blob = new Blob([fileContent], { type: 'text/typescript;charset=utf-8;' });
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
@@ -1013,16 +1027,36 @@ export default function EditorPanel({ data, onPreview, onSave, onReset, onClose 
                             <div key={imgIdx} className="p-3 bg-[var(--surface-2)] border border-[var(--line)] rounded-2xl flex flex-col gap-2 relative shadow-sm">
                               <div className="flex items-center justify-between">
                                 <span className="text-[10px] font-extrabold text-[var(--muted)] uppercase tracking-wider">Imagen #{imgIdx + 1}</span>
-                                {imgUrl && (
-                                  <button
-                                    type="button"
-                                    onClick={() => handleRemoveProjectImage(idx, imgIdx)}
-                                    className="p-1 text-red-500 hover:bg-red-500/10 rounded-lg border border-transparent hover:border-red-500/20 transition-all cursor-pointer"
-                                    title="Quitar imagen"
-                                  >
-                                    <X className="w-3.5 h-3.5" />
-                                  </button>
-                                )}
+                                <div className="flex items-center gap-2">
+                                  <label className="inline-flex items-center gap-1 text-[9px] font-extrabold text-[var(--primary)] hover:opacity-80 cursor-pointer uppercase transition-opacity">
+                                    {uploadingProjImg?.idx === idx && uploadingProjImg?.imgIdx === imgIdx ? (
+                                      <Loader2 className="w-3 h-3 animate-spin text-[var(--primary)]" />
+                                    ) : (
+                                      <Upload className="w-3 h-3" />
+                                    )}
+                                    Subir
+                                    <input
+                                      type="file"
+                                      accept="image/*"
+                                      className="hidden"
+                                      onChange={(e) => {
+                                        const file = e.target.files?.[0];
+                                        if (file) handleProjectImageUpload(idx, imgIdx, file);
+                                      }}
+                                      disabled={uploadingProjImg !== null}
+                                    />
+                                  </label>
+                                  {imgUrl && (
+                                    <button
+                                      type="button"
+                                      onClick={() => handleRemoveProjectImage(idx, imgIdx)}
+                                      className="p-1 text-red-500 hover:bg-red-500/10 rounded-lg border border-transparent hover:border-red-500/20 transition-all cursor-pointer"
+                                      title="Quitar imagen"
+                                    >
+                                      <X className="w-3.5 h-3.5" />
+                                    </button>
+                                  )}
+                                </div>
                               </div>
 
                               {/* Preview Area */}

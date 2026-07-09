@@ -11,7 +11,7 @@ interface ProjectCarouselProps {
 
 export default function ProjectCarousel({ project, className = "absolute inset-0 w-full h-full", enableZoom = false }: ProjectCarouselProps) {
   // Extract all valid images
-  const images = React.useMemo(() => {
+  const allImages = React.useMemo(() => {
     const list: string[] = [];
     if (project.imageUrls && project.imageUrls.length > 0) {
       project.imageUrls.forEach(url => {
@@ -27,8 +27,21 @@ export default function ProjectCarousel({ project, className = "absolute inset-0
     return list;
   }, [project.imageUrls, project.imageUrl]);
 
+  const [failedImages, setFailedImages] = useState<Record<string, boolean>>({});
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isFullscreenOpen, setIsFullscreenOpen] = useState(false);
+
+  // Dynamically filter out images that failed to load (e.g. legacy/broken github links)
+  const images = React.useMemo(() => {
+    return allImages.filter(img => !failedImages[img]);
+  }, [allImages, failedImages]);
+
+  // Adjust current index if it gets out of bounds after filtering failed images
+  useEffect(() => {
+    if (currentIndex >= images.length && images.length > 0) {
+      setCurrentIndex(0);
+    }
+  }, [images, currentIndex]);
 
   useEffect(() => {
     if (images.length <= 1) {
@@ -65,8 +78,9 @@ export default function ProjectCarousel({ project, className = "absolute inset-0
               e.stopPropagation();
               setIsFullscreenOpen(true);
             } : undefined}
-            onError={(e) => {
-              (e.target as HTMLImageElement).src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><rect width="100" height="100" fill="%23f1f5f9"/><text x="50" y="55" font-family="sans-serif" font-size="9" fill="%2364748b" text-anchor="middle">Error al cargar</text></svg>';
+            onError={() => {
+              // Mark as failed to dynamically exclude it from working set
+              setFailedImages(prev => ({ ...prev, [img]: true }));
             }}
           />
         );

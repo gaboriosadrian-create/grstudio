@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Mail, MessageCircle, ExternalLink, Sparkles, Check, Copy } from 'lucide-react';
-import { defaultPortfolioData } from './initialPortfolioData';
-import { PortfolioData } from './types';
-import { savePortfolioData, loadPortfolioData, deletePortfolioData } from './db';
+import { defaultPortfolioData } from './initialPortfolioData.ts';
+import { PortfolioData } from './types.ts';
+import { savePortfolioData, loadPortfolioData, deletePortfolioData } from './db.ts';
 
 // Subcomponents
 import Navbar from './components/Navbar';
@@ -150,8 +150,17 @@ export default function App() {
       },
       body: JSON.stringify(newData),
     })
-      .then((res) => {
+      .then(async (res) => {
         if (res.ok) {
+          const result = await res.json();
+          if (result.success && result.data) {
+            // Update react state, localStorage, and IndexedDB with localized relative paths returned by server!
+            setData(result.data);
+            try {
+              localStorage.setItem('user_portfolio_data', JSON.stringify(result.data));
+            } catch (e) {}
+            savePortfolioData(result.data).catch(err => console.error('Error saving processed data to IndexedDB:', err));
+          }
           console.log('Sincronización con initialPortfolioData.ts exitosa. Los cambios persistirán en el próximo deploy de producción.');
         } else {
           console.warn('No se pudo sincronizar initialPortfolioData.ts (esto es normal si estás en producción en Vercel y no tienes servidor backend de escritura).');

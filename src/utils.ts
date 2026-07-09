@@ -6,6 +6,13 @@ export function formatMediaUrl(url: string | undefined): string {
   if (!url) return '';
   const trimmed = url.trim();
 
+  // Rule: Automatically detect and convert any absolute URLs (e.g. raw.githubusercontent.com)
+  // that point to our local asset folders (portfolio, perfil, logo) so they load instantly from the public folder.
+  const assetFolderMatch = trimmed.match(/\/(?:public\/)?images\/(portfolio|perfil|logo)\/(.+)$/i);
+  if (assetFolderMatch) {
+    return `/images/${assetFolderMatch[1]}/${assetFolderMatch[2]}`;
+  }
+
   // Rule 6: Correct any logic/cases where "/images/" or "images/" is automatically added in front of an absolute URL
   if (trimmed.startsWith('/images/http://') || trimmed.startsWith('/images/https://')) {
     return trimmed.substring(8); // remove "/images/"
