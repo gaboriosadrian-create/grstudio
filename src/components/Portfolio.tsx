@@ -1,8 +1,8 @@
-import { resolveMediaUrl } from "../utils/media";
 import React, { useState } from 'react';
 import { Play, Camera, Sparkles, PenTool, Grid, Eye, X, MessageCircle, ExternalLink } from 'lucide-react';
 import { Project } from '../types';
 import ProjectCarousel from './ProjectCarousel';
+import { formatMediaUrl } from '../utils';
 
 interface PortfolioProps {
   projects: Project[];
@@ -132,7 +132,7 @@ export default function Portfolio({ projects }: PortfolioProps) {
                       </>
                     ) : (
                       <video
-                        src={resolveMediaUrl(project.videoUrl)}
+                        src={formatMediaUrl(project.videoUrl)}
                         muted
                         playsInline
                         loop
@@ -242,7 +242,7 @@ export default function Portfolio({ projects }: PortfolioProps) {
                   } else {
                     return (
                       <video
-                        src={selectedProject.videoUrl}
+                        src={formatMediaUrl(selectedProject.videoUrl)}
                         controls
                         autoPlay
                         className="max-h-full max-w-full"

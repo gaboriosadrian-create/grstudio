@@ -1,4 +1,5 @@
 import React from 'react';
+import { formatMediaUrl } from '../utils';
 
 interface LogoProps {
   className?: string;
@@ -12,7 +13,7 @@ export default function Logo({ className = "w-10 h-10", variant = "badge", logoU
     return (
       <div className={`${className} rounded-xl flex items-center justify-center bg-[var(--surface-2)] shadow-md border border-[var(--line)] overflow-hidden transition-all duration-300 group`}>
         <img
-          src={logoUrl}
+          src={formatMediaUrl(logoUrl)}
           alt={initials || "Logo"}
           className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
           onError={(e) => {

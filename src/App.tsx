@@ -21,6 +21,7 @@ export default function App() {
   const [isEditorOpen, setIsEditorOpen] = useState(false);
   const [copied, setCopied] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [saveSuccess, setSaveSuccess] = useState(false);
 
   // Initialize theme and portfolio data on load
   useEffect(() => {
@@ -125,6 +126,10 @@ export default function App() {
   };
 
   // Portfolio data actions
+  const handlePreviewData = (newData: PortfolioData) => {
+    setData(newData);
+  };
+
   const handleSaveData = (newData: PortfolioData) => {
     setData(newData);
     
@@ -162,6 +167,10 @@ export default function App() {
     } catch (e) {
       console.warn('El tamaño de los datos excede el límite de localStorage. Guardado solo en IndexedDB de forma segura.');
     }
+
+    // Show success feedback
+    setSaveSuccess(true);
+    setTimeout(() => setSaveSuccess(false), 3000);
   };
 
   const handleResetData = () => {
@@ -335,6 +344,17 @@ export default function App() {
         <Check className="w-3.5 h-3.5 text-[var(--primary)]" /> Correo copiado
       </div>
 
+      {/* Save confirmation feedback toast */}
+      <div
+        className={`fixed right-20 bottom-20 z-50 px-3.5 py-2 rounded-full bg-emerald-600 text-white text-xs font-black shadow-lg transition-all duration-300 pointer-events-none flex items-center gap-1.5 ${
+          saveSuccess ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'
+        }`}
+        role="status"
+        aria-live="polite"
+      >
+        <Check className="w-3.5 h-3.5 text-white" /> ¡Cambios guardados con éxito!
+      </div>
+
       {/* Sliding Content Editor Side Panel */}
       {isEditorOpen && (
         <>
@@ -345,6 +365,7 @@ export default function App() {
           />
           <EditorPanel
             data={data}
+            onPreview={handlePreviewData}
             onSave={handleSaveData}
             onReset={handleResetData}
             onClose={() => setIsEditorOpen(false)}

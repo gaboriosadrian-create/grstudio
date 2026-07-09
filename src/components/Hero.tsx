@@ -2,6 +2,7 @@ import React from 'react';
 import { ArrowRight, Sparkles, Play, ArrowUpRight, CheckCircle2, Wand2, Zap } from 'lucide-react';
 import { HeroInfo, ProfileInfo } from '../types';
 import Logo from './Logo';
+import { formatMediaUrl } from '../utils';
 
 interface HeroProps {
   hero: HeroInfo;
@@ -12,13 +13,13 @@ export default function Hero({ hero, profile }: HeroProps) {
   const imageSources = React.useMemo(() => {
     const sources = [];
     if (profile.profilePhotoUrl) {
-      sources.push(profile.profilePhotoUrl);
+      sources.push(formatMediaUrl(profile.profilePhotoUrl));
     }
     sources.push(
-      '/images/perfil/mi_foto_real.png',
-      '/images/perfil/mi_foto_real.jpg',
-      '/images/perfil/mi_foto.png',
-      '/images/perfil/mi_foto.jpg'
+      formatMediaUrl('/images/perfil/mi_foto_real.png'),
+      formatMediaUrl('/images/perfil/mi_foto_real.jpg'),
+      formatMediaUrl('/images/perfil/mi_foto.png'),
+      formatMediaUrl('/images/perfil/mi_foto.jpg')
     );
     return sources;
   }, [profile.profilePhotoUrl]);

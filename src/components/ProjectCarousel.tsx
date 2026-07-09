@@ -1,7 +1,7 @@
-import { resolveMediaUrl } from "../utils/media";
 import React, { useState, useEffect } from 'react';
 import { Project } from '../types';
 import { Maximize2, X, ZoomIn } from 'lucide-react';
+import { formatMediaUrl } from '../utils';
 
 interface ProjectCarouselProps {
   project: Project;
@@ -16,13 +16,13 @@ export default function ProjectCarousel({ project, className = "absolute inset-0
     if (project.imageUrls && project.imageUrls.length > 0) {
       project.imageUrls.forEach(url => {
         if (url && url.trim() !== '') {
-          list.push(url);
+          list.push(formatMediaUrl(url));
         }
       });
     }
     // Fallback to legacy single image if array is empty
     if (list.length === 0 && project.imageUrl && project.imageUrl.trim() !== '') {
-      list.push(project.imageUrl);
+      list.push(formatMediaUrl(project.imageUrl));
     }
     return list;
   }, [project.imageUrls, project.imageUrl]);

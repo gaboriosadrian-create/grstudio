@@ -1,7 +1,7 @@
-import { resolveMediaUrl } from "../utils/media";
 import React, { useState } from 'react';
 import { X, Save, RotateCcw, Copy, Check, Users, Sparkles, Sliders, DollarSign, Award, Briefcase, Grid, Trash2, Plus, Upload, Loader2 } from 'lucide-react';
 import { PortfolioData, Project } from '../types';
+import { formatMediaUrl } from '../utils';
 
 // Utility helper to convert GitHub web blob URLs to raw direct image URLs
 export const cleanImageUrl = (url: string): string => {
@@ -37,6 +37,7 @@ const cleanPortfolioData = (data: PortfolioData): PortfolioData => {
 
 interface EditorPanelProps {
   data: PortfolioData;
+  onPreview?: (newData: PortfolioData) => void;
   onSave: (newData: PortfolioData) => void;
   onReset: () => void;
   onClose: () => void;
@@ -44,7 +45,7 @@ interface EditorPanelProps {
 
 type TabType = 'perfil' | 'hero' | 'portfolio' | 'metrics' | 'services' | 'plans';
 
-export default function EditorPanel({ data, onSave, onReset, onClose }: EditorPanelProps) {
+export default function EditorPanel({ data, onPreview, onSave, onReset, onClose }: EditorPanelProps) {
   const [activeTab, setActiveTab] = useState<TabType>('perfil');
   const [editedData, setEditedData] = useState<PortfolioData>(cleanPortfolioData(data));
   const [copySuccess, setCopySuccess] = useState(false);
@@ -57,8 +58,12 @@ export default function EditorPanel({ data, onSave, onReset, onClose }: EditorPa
 
   // Sync edits to parent in real-time for live preview (including uploaded files)
   React.useEffect(() => {
-    onSave(editedData);
-  }, [editedData, onSave]);
+    if (onPreview) {
+      onPreview(editedData);
+    } else {
+      onSave(editedData);
+    }
+  }, [editedData, onPreview, onSave]);
 
   const convertToBase64 = (file: File): Promise<string> => {
     return new Promise((resolve, reject) => {
@@ -611,7 +616,7 @@ export default function EditorPanel({ data, onSave, onReset, onClose }: EditorPa
                     <div className="w-16 h-16 rounded-xl border border-[var(--line)] bg-[var(--surface)] flex items-center justify-center overflow-hidden shadow-sm">
                       {editedData.profile.logoUrl ? (
                         <img 
-                          src={editedData.profile.logoUrl} 
+                          src={formatMediaUrl(editedData.profile.logoUrl)} 
                           alt="Logo actual" 
                           className="w-full h-full object-cover"
                           onError={(e) => {
@@ -690,7 +695,7 @@ export default function EditorPanel({ data, onSave, onReset, onClose }: EditorPa
                     <div className="w-16 h-16 rounded-full border border-[var(--line)] bg-[var(--surface)] flex items-center justify-center overflow-hidden shadow-sm">
                       {editedData.profile.profilePhotoUrl ? (
                         <img 
-                          src={editedData.profile.profilePhotoUrl} 
+                          src={formatMediaUrl(editedData.profile.profilePhotoUrl)} 
                           alt="Foto de perfil actual" 
                           className="w-full h-full object-cover"
                           onError={(e) => {
@@ -699,7 +704,7 @@ export default function EditorPanel({ data, onSave, onReset, onClose }: EditorPa
                         />
                       ) : (
                         <img 
-                          src="/images/perfil/mi_foto_real.png" 
+                          src={formatMediaUrl("/images/perfil/mi_foto_real.png")} 
                           alt="Foto por defecto" 
                           className="w-full h-full object-cover"
                         />
@@ -1024,7 +1029,7 @@ export default function EditorPanel({ data, onSave, onReset, onClose }: EditorPa
                               <div className="h-20 w-full relative rounded-xl border border-[var(--line)] bg-[var(--surface)] flex items-center justify-center overflow-hidden">
                                 {imgUrl ? (
                                   <img
-                                    src={imgUrl}
+                                    src={formatMediaUrl(imgUrl)}
                                     alt={`Imagen ${imgIdx + 1}`}
                                     className="w-full h-full object-cover"
                                     onError={(e) => {
