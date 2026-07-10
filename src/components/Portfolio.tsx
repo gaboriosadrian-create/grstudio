@@ -108,7 +108,7 @@ export default function Portfolio({ projects }: PortfolioProps) {
 
         {/* Portfolio Cards Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredProjects.map((project) => (
+          {filteredProjects.map((project, index) => (
             <article
               key={project.id}
               onClick={() => setSelectedProject(project)}
@@ -118,7 +118,7 @@ export default function Portfolio({ projects }: PortfolioProps) {
               <div className="relative h-[448px] flex flex-col justify-between p-6 overflow-hidden">
                 {project.imageUrl || (project.imageUrls && project.imageUrls.length > 0) ? (
                   <>
-                    <ProjectCarousel project={project} />
+                    <ProjectCarousel project={project} staggerDelay={index * 4000} />
                   </>
                 ) : project.videoUrl ? (
                   <>
@@ -203,26 +203,26 @@ export default function Portfolio({ projects }: PortfolioProps) {
       {/* Interactive Modal for Details & Media Preview */}
       {selectedProject && (
         <div 
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fade-in overflow-y-auto"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fade-in"
           onClick={() => setSelectedProject(null)}
         >
           <div 
-            className="relative w-full max-w-3xl my-auto max-h-[96vh] sm:max-h-[92vh] flex flex-col overflow-hidden rounded-[32px] border border-[var(--line)] bg-[var(--surface)] shadow-2xl animate-scale-in"
+            className="relative w-full max-w-5xl h-[90vh] md:h-[80vh] md:max-h-[750px] flex flex-col md:flex-row overflow-hidden rounded-[32px] border border-[var(--line)] bg-[var(--surface)] shadow-2xl animate-scale-in"
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Header / Top actions */}
+            {/* Close Button */}
             <div className="absolute top-4 right-4 z-50">
               <button
                 onClick={() => setSelectedProject(null)}
-                className="p-2 rounded-full bg-black/60 text-white hover:bg-black/95 transition-colors cursor-pointer border border-white/10"
+                className="p-2.5 rounded-full bg-black/60 text-white hover:bg-black/95 transition-colors cursor-pointer border border-white/10 shadow-lg"
                 aria-label="Cerrar modal"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
-            {/* Media Area (Video/Image) */}
-            <div className="relative bg-slate-950 aspect-video max-h-[32vh] sm:max-h-[38vh] w-full flex-shrink-0 flex items-center justify-center overflow-hidden border-b border-[var(--line)]">
+            {/* Left Side: Media Area (Video/Image) */}
+            <div className="relative bg-slate-950 h-[45%] md:h-full md:w-[60%] flex-shrink-0 flex items-center justify-center overflow-hidden border-b md:border-b-0 md:border-r border-[var(--line)]">
               {selectedProject.videoUrl ? (
                 // Video rendering
                 (() => {
@@ -251,7 +251,7 @@ export default function Portfolio({ projects }: PortfolioProps) {
                 })()
               ) : (selectedProject.imageUrl || (selectedProject.imageUrls && selectedProject.imageUrls.length > 0)) ? (
                 // Image rendering
-                <ProjectCarousel project={selectedProject} enableZoom={true} />
+                <ProjectCarousel project={selectedProject} enableZoom={true} objectFit="contain" />
               ) : (
                 // Beautiful gradient default with media info
                 <div className={`absolute inset-0 bg-gradient-to-br ${getGradientClass(selectedProject.colorType)} flex flex-col items-center justify-center p-8 text-center`}>
@@ -268,57 +268,51 @@ export default function Portfolio({ projects }: PortfolioProps) {
               )}
             </div>
 
-            {/* Detail Content Area */}
-            <div className="p-6 sm:p-8 overflow-y-auto flex-grow">
-              <div className="flex flex-wrap items-center gap-2 mb-3">
-                <span className="px-3 py-1 rounded-full bg-[var(--primary)]/10 text-[var(--primary)] text-xs font-black uppercase tracking-wider">
-                  {selectedProject.badge}
-                </span>
-                {selectedProject.categories.map((cat) => (
-                  <span key={cat} className="px-2.5 py-1 rounded-full bg-[var(--surface-2)] border border-[var(--line)] text-[var(--muted)] text-xs capitalize font-bold">
-                    {cat}
+            {/* Right Side: Detail Content Area */}
+            <div className="h-[55%] md:h-full md:w-[40%] flex flex-col justify-between bg-[var(--surface)] p-6 md:p-8 overflow-y-auto">
+              <div className="flex-grow">
+                <div className="flex flex-wrap items-center gap-2 mb-4">
+                  <span className="px-3 py-1 rounded-full bg-[var(--primary)]/10 text-[var(--primary)] text-xs font-black uppercase tracking-wider">
+                    {selectedProject.badge}
                   </span>
-                ))}
+                  {selectedProject.categories.map((cat) => (
+                    <span key={cat} className="px-2.5 py-1 rounded-full bg-[var(--surface-2)] border border-[var(--line)] text-[var(--muted)] text-xs capitalize font-bold">
+                      {cat}
+                    </span>
+                  ))}
+                </div>
+
+                <h3 className="font-display font-bold text-xl sm:text-2xl md:text-3xl text-[var(--text)] tracking-tight leading-snug">
+                  {selectedProject.title}
+                </h3>
+                
+                <p className="text-[var(--muted)] text-sm sm:text-base leading-relaxed mt-4 whitespace-pre-line">
+                  {selectedProject.description}
+                </p>
+
+
               </div>
 
-              <h3 className="font-display font-bold text-2xl sm:text-3xl text-[var(--text)] tracking-tight leading-snug">
-                {selectedProject.title}
-              </h3>
-              
-              <p className="text-[var(--muted)] text-base sm:text-lg leading-relaxed mt-4">
-                {selectedProject.description}
-              </p>
-
-              {/* Tags list */}
-              <div className="flex flex-wrap gap-1.5 mt-5">
-                {selectedProject.tags.map((tag) => (
-                  <span key={tag} className="px-3 py-1.5 rounded-full border border-[var(--line)] bg-[var(--surface-2)] text-[var(--muted)] text-xs font-bold">
-                    {tag}
-                  </span>
-                ))}
-              </div>
-
-              {/* WhatsApp Action and Upload Guide */}
-              <div className="mt-8 pt-6 border-t border-[var(--line)] flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
+              {/* Action area */}
+              <div className="mt-8 pt-5 border-t border-[var(--line)] flex flex-col gap-4">
                 <div className="text-left">
-                  <span className="block text-[var(--muted)] text-xs font-bold uppercase tracking-wider">¿Te gustaría una pieza así?</span>
-                  <span className="text-[var(--text)] text-sm font-semibold">Consúltame por WhatsApp en segundos</span>
+                  <span className="block text-[var(--muted)] text-[10px] sm:text-xs font-bold uppercase tracking-wider">¿Te gustaría una pieza así?</span>
+                  <span className="text-[var(--text)] text-xs sm:text-sm font-semibold leading-tight block mt-0.5">Consúltame por WhatsApp en segundos</span>
                 </div>
-                <div className="flex flex-col sm:flex-row gap-2">
-                  <a
-                    href={`https://wa.me/5492617486990?text=${encodeURIComponent(
-                      `Hola Gabriel, estuve viendo tu portafolio y me interesa mucho la pieza "${selectedProject.title}". ¿Me podrías contar más sobre este servicio?`
-                    )}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center justify-center gap-2 bg-[#25D366] text-white hover:bg-[#20ba56] font-bold text-sm sm:text-base px-6 py-3 rounded-2xl shadow-md cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0"
-                  >
-                    <MessageCircle className="w-5 h-5 fill-white" />
-                    Preguntar por esta pieza
-                  </a>
-                </div>
+                <a
+                  href={`https://wa.me/5492617486990?text=${encodeURIComponent(
+                    `Hola Gabriel, estuve viendo tu portafolio y me interesa mucho la pieza "${selectedProject.title}". ¿Me podrías contar más sobre este servicio?`
+                  )}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center justify-center gap-2 bg-[#25D366] text-white hover:bg-[#20ba56] font-bold text-sm px-5 py-3.5 rounded-2xl shadow-md cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 w-full"
+                >
+                  <MessageCircle className="w-4.5 h-4.5 fill-white" />
+                  Preguntar por esta pieza
+                </a>
               </div>
             </div>
+
           </div>
         </div>
       )}

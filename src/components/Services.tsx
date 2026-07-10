@@ -28,18 +28,25 @@ export default function Services({ services }: ServicesProps) {
   };
 
   return (
-    <section className="py-20" id="servicios">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <section 
+      className="py-24 section-depth-bg relative overflow-hidden" 
+      id="servicios"
+    >
+      {/* Background decoration flares */}
+      <div className="absolute top-0 left-1/4 w-[500px] h-[500px] rounded-full bg-blue-500/10 filter blur-[120px] pointer-events-none" />
+      <div className="absolute bottom-0 right-1/4 w-[500px] h-[500px] rounded-full bg-indigo-500/10 filter blur-[120px] pointer-events-none" />
+
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Section Header */}
         <div className="text-center max-w-3xl mx-auto mb-16">
           <span className="inline-flex items-center gap-2 px-3 py-1.5 border border-[var(--line)] rounded-full bg-[var(--surface)] text-[var(--primary)] text-xs font-black uppercase tracking-widest">
             Servicios
           </span>
-          <h2 className="font-display font-bold text-3xl sm:text-4xl lg:text-5xl tracking-tight text-[var(--text)] mt-4">
+          <h2 className="font-display font-bold text-3xl sm:text-4xl lg:text-5xl tracking-tight depth-title mt-4">
             Todo lo que necesitas para verte profesional en redes.
           </h2>
-          <p className="text-[var(--muted)] text-base sm:text-lg leading-relaxed mt-4">
+          <p className="depth-desc text-base sm:text-lg leading-relaxed mt-4 font-medium">
             Diseño un sistema de contenido para que no dependas de publicar “cuando se te ocurra algo”, sino de una estrategia constante, visual y coherente con tu marca personal.
           </p>
         </div>
@@ -52,7 +59,7 @@ export default function Services({ services }: ServicesProps) {
               className="group relative overflow-hidden p-8 border border-[var(--line)] rounded-[28px] bg-[var(--surface)] shadow-sm hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300"
             >
               {/* Blur accent background on hover */}
-              <div className="absolute right-[-40px] bottom-[-40px] w-40 h-40 rounded-full bg-[var(--primary-soft)] opacity-60 filter blur-xl group-hover:scale-125 transition-transform duration-500" />
+              <div className="absolute right-[-40px] bottom-[-40px] w-40 h-40 rounded-full bg-[var(--primary-soft)] opacity-60 filter blur-xl group-hover:scale-125 transition-transform duration-500 pointer-events-none" />
 
               {/* Icon */}
               <div className="relative z-10 w-14 h-14 rounded-2xl flex items-center justify-center border border-[var(--line)] bg-gradient-to-br from-[var(--primary-soft)] to-[var(--secondary-soft)] mb-6">
@@ -70,9 +77,9 @@ export default function Services({ services }: ServicesProps) {
               {/* Link CTA */}
               <a
                 href="#contacto"
-                className="relative z-10 inline-flex items-center gap-1.5 font-bold text-sm text-[var(--primary)] group-hover:translate-x-1 transition-transform"
+                className="relative z-10 inline-flex items-center gap-1.5 font-bold text-sm text-[var(--primary)] group-hover:translate-x-1 transition-all"
               >
-                {service.ctaText} <span aria-hidden="true">→</span>
+                {service.ctaText} <span aria-hidden="true" className="inline-block transition-transform group-hover:translate-x-0.5">→</span>
               </a>
             </article>
           ))}

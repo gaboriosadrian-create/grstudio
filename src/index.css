@@ -1,10 +1,12 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Antonio:wght@400;700&family=Montserrat:wght@200;300;400;500&family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap');
 @import "tailwindcss";
 
 @theme {
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
   --font-display: "Space Grotesk", sans-serif;
   --font-mono: "JetBrains Mono", monospace;
+  --font-antonio: "Antonio", sans-serif;
+  --font-montserrat: "Montserrat", sans-serif;
 }
 
 :root {
@@ -143,3 +145,34 @@ body::before {
 ::-webkit-scrollbar-thumb:hover {
   background: var(--primary);
 }
+
+/* Custom background to match user's image with depth effect */
+.section-depth-bg {
+  background: radial-gradient(circle at center, #f5fafd 0%, #b2d7f7 50%, #4691de 100%);
+  border-top: 1px solid rgba(14, 94, 228, 0.15);
+  border-bottom: 1px solid rgba(14, 94, 228, 0.15);
+}
+
+html[data-theme="dark"] .section-depth-bg {
+  background: radial-gradient(circle at center, #1b2f54 0%, #0a1426 60%, #030814 100%);
+  border-top: 1px solid rgba(240, 245, 255, 0.08);
+  border-bottom: 1px solid rgba(240, 245, 255, 0.08);
+}
+
+/* Depth background text overrides for absolute legibility in day & night themes */
+.depth-title {
+  color: #051636 !important;
+}
+
+html[data-theme="dark"] .depth-title {
+  color: #f0f5ff !important;
+}
+
+.depth-desc {
+  color: #1e293b !important;
+}
+
+html[data-theme="dark"] .depth-desc {
+  color: #e2e8f0 !important;
+}
+

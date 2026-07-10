@@ -224,15 +224,15 @@ export default function Hero({ hero, profile }: HeroProps) {
             </div>
 
             <div
-              className="absolute flex items-center gap-3 p-3.5 border border-[var(--line)] rounded-2xl bg-[var(--surface)] shadow-md backdrop-blur-lg animate-float-custom top-[24%] right-[-50px] sm:right-[-90px] md:right-[-115px]"
+              className="absolute flex items-center gap-2 sm:gap-3 p-2.5 sm:p-3.5 border border-[var(--line)] rounded-2xl bg-[var(--surface)] shadow-md backdrop-blur-lg animate-float-custom top-[-10px] sm:top-[-20px] right-[-15px] sm:right-[-35px] md:right-[-50px]"
               style={{ '--r': '2.5deg', 'animationDelay': '-1s' } as React.CSSProperties}
             >
-              <span className="w-10 h-10 rounded-xl flex items-center justify-center text-white bg-gradient-to-br from-[var(--primary)] to-[var(--secondary)] font-bold animate-pulse">
-                <Zap className="w-4 h-4 text-amber-300 fill-amber-300" />
+              <span className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center text-white bg-gradient-to-br from-[var(--primary)] to-[var(--secondary)] font-bold animate-pulse">
+                <Zap className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-300 fill-amber-300" />
               </span>
               <span className="text-left leading-none">
-                <b className="block text-sm font-bold tracking-tight text-[var(--text)]">Método WOW</b>
-                <span className="text-[var(--muted)] text-xs font-semibold">diseño que impacta</span>
+                <b className="block text-xs sm:text-sm font-bold tracking-tight text-[var(--text)]">Método WOW</b>
+                <span className="text-[var(--muted)] text-[10px] sm:text-xs font-semibold">diseño que impacta</span>
               </span>
             </div>
 

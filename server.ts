@@ -2,7 +2,6 @@ import express from "express";
 import path from "path";
 import fs from "fs";
 import { fileURLToPath } from "url";
-import { createServer as createViteServer } from "vite";
 import _multer from "multer";
 
 const multer = (_multer as any).default || _multer;
@@ -13,7 +12,7 @@ const __dirname = hasImportMeta ? path.dirname(__filename) : "";
 
 async function startServer() {
   const app = express();
-  const PORT = 3000;
+  const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;
 
   // Ensure source persistent directories exist
   const srcImagesDir = path.join(process.cwd(), "src", "images");
@@ -21,9 +20,13 @@ async function startServer() {
   const srcLogoDir = path.join(srcImagesDir, "logo");
   const srcPerfilDir = path.join(srcImagesDir, "perfil");
 
-  if (!fs.existsSync(srcPortfolioDir)) fs.mkdirSync(srcPortfolioDir, { recursive: true });
-  if (!fs.existsSync(srcLogoDir)) fs.mkdirSync(srcLogoDir, { recursive: true });
-  if (!fs.existsSync(srcPerfilDir)) fs.mkdirSync(srcPerfilDir, { recursive: true });
+  try {
+    if (!fs.existsSync(srcPortfolioDir)) fs.mkdirSync(srcPortfolioDir, { recursive: true });
+    if (!fs.existsSync(srcLogoDir)) fs.mkdirSync(srcLogoDir, { recursive: true });
+    if (!fs.existsSync(srcPerfilDir)) fs.mkdirSync(srcPerfilDir, { recursive: true });
+  } catch (err) {
+    console.warn("No se pudieron crear directorios en /src (posible entorno de solo lectura):", err);
+  }
 
   // Ensure public ephemeral directories exist
   const publicImagesDir = path.join(process.cwd(), "public", "images");
@@ -31,46 +34,78 @@ async function startServer() {
   const logoDir = path.join(publicImagesDir, "logo");
   const perfilDir = path.join(publicImagesDir, "perfil");
 
-  if (!fs.existsSync(portfolioDir)) fs.mkdirSync(portfolioDir, { recursive: true });
-  if (!fs.existsSync(logoDir)) fs.mkdirSync(logoDir, { recursive: true });
-  if (!fs.existsSync(perfilDir)) fs.mkdirSync(perfilDir, { recursive: true });
+  try {
+    if (!fs.existsSync(portfolioDir)) fs.mkdirSync(portfolioDir, { recursive: true });
+    if (!fs.existsSync(logoDir)) fs.mkdirSync(logoDir, { recursive: true });
+    if (!fs.existsSync(perfilDir)) fs.mkdirSync(perfilDir, { recursive: true });
+  } catch (err) {
+    console.warn("No se pudieron crear directorios en /public (posible entorno de solo lectura):", err);
+  }
 
   // Ensure legacy uploads directory exists
   const uploadDir = path.join(process.cwd(), "uploads");
-  if (!fs.existsSync(uploadDir)) {
-    fs.mkdirSync(uploadDir, { recursive: true });
+  try {
+    if (!fs.existsSync(uploadDir)) {
+      fs.mkdirSync(uploadDir, { recursive: true });
+    }
+  } catch (err) {
+    console.warn("No se pudo crear el directorio de uploads (posible entorno de solo lectura):", err);
   }
 
   // Double-direction directory synchronizer (keeps src/images and public/images merged and persistent)
   function syncFoldersSync(dirA: string, dirB: string) {
-    if (!fs.existsSync(dirA)) fs.mkdirSync(dirA, { recursive: true });
-    if (!fs.existsSync(dirB)) fs.mkdirSync(dirB, { recursive: true });
+    try {
+      if (!fs.existsSync(dirA)) fs.mkdirSync(dirA, { recursive: true });
+    } catch (e) {}
+    try {
+      if (!fs.existsSync(dirB)) fs.mkdirSync(dirB, { recursive: true });
+    } catch (e) {}
 
     // Copy from A to B if B doesn't have it
-    fs.readdirSync(dirA).forEach((element) => {
-      const pathA = path.join(dirA, element);
-      const pathB = path.join(dirB, element);
-      if (fs.lstatSync(pathA).isDirectory()) {
-        syncFoldersSync(pathA, pathB);
-      } else {
-        if (!fs.existsSync(pathB)) {
-          fs.copyFileSync(pathA, pathB);
-          console.log(`Restored/Synced file to public: ${element}`);
-        }
+    try {
+      if (fs.existsSync(dirA)) {
+        fs.readdirSync(dirA).forEach((element) => {
+          const pathA = path.join(dirA, element);
+          const pathB = path.join(dirB, element);
+          if (fs.lstatSync(pathA).isDirectory()) {
+            syncFoldersSync(pathA, pathB);
+          } else {
+            if (!fs.existsSync(pathB)) {
+              try {
+                fs.copyFileSync(pathA, pathB);
+                console.log(`Restored/Synced file to public: ${element}`);
+              } catch (copyErr) {
+                console.warn(`No se pudo copiar de A a B: ${element}`, copyErr);
+              }
+            }
+          }
+        });
       }
-    });
+    } catch (err) {
+      console.warn(`Error al leer o sincronizar directorio A: ${dirA}`, err);
+    }
 
     // Copy from B to A if A doesn't have it
-    fs.readdirSync(dirB).forEach((element) => {
-      const pathA = path.join(dirA, element);
-      const pathB = path.join(dirB, element);
-      if (!fs.lstatSync(pathB).isDirectory()) {
-        if (!fs.existsSync(pathA)) {
-          fs.copyFileSync(pathB, pathA);
-          console.log(`Persisted/Synced file to src: ${element}`);
-        }
+    try {
+      if (fs.existsSync(dirB)) {
+        fs.readdirSync(dirB).forEach((element) => {
+          const pathA = path.join(dirA, element);
+          const pathB = path.join(dirB, element);
+          if (!fs.lstatSync(pathB).isDirectory()) {
+            if (!fs.existsSync(pathA)) {
+              try {
+                fs.copyFileSync(pathB, pathA);
+                console.log(`Persisted/Synced file to src: ${element}`);
+              } catch (copyErr) {
+                console.warn(`No se pudo copiar de B a A: ${element}`, copyErr);
+              }
+            }
+          }
+        });
       }
-    });
+    } catch (err) {
+      console.warn(`Error al leer o sincronizar directorio B: ${dirB}`, err);
+    }
   }
 
   // Perform bi-directional sync on startup
@@ -440,6 +475,7 @@ async function startServer() {
 
   // Vite middleware for development
   if (process.env.NODE_ENV !== "production") {
+    const { createServer: createViteServer } = await import("vite");
     const vite = await createViteServer({
       server: { middlewareMode: true },
       appType: "spa",

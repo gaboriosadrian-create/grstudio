@@ -51,11 +51,16 @@ export default function Navbar({ profile, isDark, toggleTheme, openEditor, isEdi
     <header className="sticky top-0 z-50 bg-[var(--header-bg)] border-b border-[var(--line)] backdrop-blur-md">
       <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between" aria-label="Navegación principal">
         {/* Logo */}
-        <a href="#inicio" className="flex items-center gap-3 font-extrabold text-xl tracking-tight text-[var(--text)] transition-transform hover:scale-102">
-          <Logo className="w-10 h-10" logoUrl={profile.logoUrl} initials={profile.initials} />
-          <span className="font-display font-bold leading-none hidden sm:block">
-            {profile.name}
-          </span>
+        <a href="#inicio" className="flex items-center gap-3 tracking-tight text-[var(--text)] transition-transform hover:scale-102">
+          <Logo className="w-10 h-10 sm:w-11 sm:h-11" logoUrl={profile.logoUrl} initials={profile.initials} />
+          <div className="flex flex-col text-left leading-none">
+            <span className="font-sans text-lg sm:text-xl font-bold tracking-tight text-[var(--text)] leading-tight">
+              {profile.name}
+            </span>
+            <span className="font-montserrat font-light text-[10px] sm:text-xs tracking-widest text-[var(--muted)] leading-none mt-0.5">
+              {profile.role}
+            </span>
+          </div>
         </a>
 
         {/* Desktop Links */}

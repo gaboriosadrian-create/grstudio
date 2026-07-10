@@ -1005,17 +1005,17 @@ export default function EditorPanel({ data, onPreview, onSave, onReset, onClose 
                       </select>
                     </div>
 
-                    {/* Carrusel de Imágenes de la Pieza (Máximo 3) */}
+                    {/* Carrusel de Imágenes de la Pieza (Máximo 5) */}
                     <div className="flex flex-col gap-2 col-span-2 border-t border-[var(--line)] pt-4 mt-2">
                       <div className="flex items-center justify-between">
                         <label className="text-xs font-bold text-[var(--text)]">
-                          Imágenes de la Galería / Carrusel (Hasta 3)
+                          Imágenes de la Galería / Carrusel (Hasta 5)
                         </label>
                         <span className="text-[10px] text-[var(--muted)] font-black uppercase tracking-wider bg-[var(--primary-soft)] text-[var(--primary)] px-2 py-0.5 rounded-full">Rotación automática cada 8s</span>
                       </div>
                       
-                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                        {[0, 1, 2].map((imgIdx) => {
+                      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2.5">
+                        {[0, 1, 2, 3, 4].map((imgIdx) => {
                           const currentImages = project.imageUrls || [];
                           // Fallback to project.imageUrl for first slot if array is empty
                           let imgUrl = currentImages[imgIdx] || '';
@@ -1024,15 +1024,15 @@ export default function EditorPanel({ data, onPreview, onSave, onReset, onClose 
                           }
 
                           return (
-                            <div key={imgIdx} className="p-3 bg-[var(--surface-2)] border border-[var(--line)] rounded-2xl flex flex-col gap-2 relative shadow-sm">
+                            <div key={imgIdx} className="p-2.5 bg-[var(--surface-2)] border border-[var(--line)] rounded-2xl flex flex-col gap-2 relative shadow-sm">
                               <div className="flex items-center justify-between">
-                                <span className="text-[10px] font-extrabold text-[var(--muted)] uppercase tracking-wider">Imagen #{imgIdx + 1}</span>
-                                <div className="flex items-center gap-2">
+                                <span className="text-[10px] font-extrabold text-[var(--muted)] uppercase tracking-wider">Img #{imgIdx + 1}</span>
+                                <div className="flex items-center gap-1.5">
                                   <label className="inline-flex items-center gap-1 text-[9px] font-extrabold text-[var(--primary)] hover:opacity-80 cursor-pointer uppercase transition-opacity">
                                     {uploadingProjImg?.idx === idx && uploadingProjImg?.imgIdx === imgIdx ? (
-                                      <Loader2 className="w-3 h-3 animate-spin text-[var(--primary)]" />
+                                      <Loader2 className="w-2.5 h-2.5 animate-spin text-[var(--primary)]" />
                                     ) : (
-                                      <Upload className="w-3 h-3" />
+                                      <Upload className="w-2.5 h-2.5" />
                                     )}
                                     Subir
                                     <input
@@ -1050,17 +1050,17 @@ export default function EditorPanel({ data, onPreview, onSave, onReset, onClose 
                                     <button
                                       type="button"
                                       onClick={() => handleRemoveProjectImage(idx, imgIdx)}
-                                      className="p-1 text-red-500 hover:bg-red-500/10 rounded-lg border border-transparent hover:border-red-500/20 transition-all cursor-pointer"
+                                      className="p-0.5 text-red-500 hover:bg-red-500/10 rounded-lg border border-transparent hover:border-red-500/20 transition-all cursor-pointer"
                                       title="Quitar imagen"
                                     >
-                                      <X className="w-3.5 h-3.5" />
+                                      <X className="w-3 h-3" />
                                     </button>
                                   )}
                                 </div>
                               </div>
 
                               {/* Preview Area */}
-                              <div className="h-20 w-full relative rounded-xl border border-[var(--line)] bg-[var(--surface)] flex items-center justify-center overflow-hidden">
+                              <div className="h-16 w-full relative rounded-xl border border-[var(--line)] bg-[var(--surface)] flex items-center justify-center overflow-hidden">
                                 {imgUrl ? (
                                   <img
                                     src={formatMediaUrl(imgUrl)}
@@ -1071,7 +1071,7 @@ export default function EditorPanel({ data, onPreview, onSave, onReset, onClose 
                                     }}
                                   />
                                 ) : (
-                                  <span className="text-[10px] text-[var(--muted)] font-bold uppercase tracking-wider">Sin URL</span>
+                                  <span className="text-[9px] text-[var(--muted)] font-bold uppercase tracking-wider">Vació</span>
                                 )}
                               </div>
 
@@ -1080,8 +1080,8 @@ export default function EditorPanel({ data, onPreview, onSave, onReset, onClose 
                                 type="text"
                                 value={imgUrl}
                                 onChange={(e) => handleProjectImageChange(idx, imgIdx, e.target.value)}
-                                placeholder="Pegar URL de la imagen (http...)"
-                                className="w-full px-2 py-2 border border-[var(--line)] rounded-xl text-[11px] bg-[var(--surface)] text-[var(--text)] outline-none focus:border-[var(--primary)] font-semibold transition-all"
+                                placeholder="URL"
+                                className="w-full px-2 py-1 border border-[var(--line)] rounded-lg text-[10px] bg-[var(--surface)] text-[var(--text)] outline-none focus:border-[var(--primary)] font-semibold transition-all"
                               />
                             </div>
                           );

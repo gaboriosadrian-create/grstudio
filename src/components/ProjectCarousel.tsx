@@ -7,9 +7,17 @@ interface ProjectCarouselProps {
   project: Project;
   className?: string;
   enableZoom?: boolean;
+  objectFit?: 'cover' | 'contain';
+  staggerDelay?: number;
 }
 
-export default function ProjectCarousel({ project, className = "absolute inset-0 w-full h-full", enableZoom = false }: ProjectCarouselProps) {
+export default function ProjectCarousel({ 
+  project, 
+  className = "absolute inset-0 w-full h-full", 
+  enableZoom = false,
+  objectFit = 'cover',
+  staggerDelay = 0
+}: ProjectCarouselProps) {
   // Extract all valid images
   const allImages = React.useMemo(() => {
     const list: string[] = [];
@@ -52,19 +60,36 @@ export default function ProjectCarousel({ project, className = "absolute inset-0
     // Only auto-rotate if fullscreen lightbox is not open
     if (isFullscreenOpen) return;
 
-    const interval = setInterval(() => {
-      setCurrentIndex((prevIndex) => (prevIndex + 1) % images.length);
-    }, 8000); // Shift every 8 seconds
+    let intervalId: any;
+    let timeoutId: any;
 
-    return () => clearInterval(interval);
-  }, [images, isFullscreenOpen]);
+    if (staggerDelay && staggerDelay > 0) {
+      // Start with a delay, transition, and then set standard interval
+      timeoutId = setTimeout(() => {
+        setCurrentIndex((prevIndex) => (prevIndex + 1) % images.length);
+        intervalId = setInterval(() => {
+          setCurrentIndex((prevIndex) => (prevIndex + 1) % images.length);
+        }, 8000);
+      }, staggerDelay);
+    } else {
+      // Start immediately
+      intervalId = setInterval(() => {
+        setCurrentIndex((prevIndex) => (prevIndex + 1) % images.length);
+      }, 8000);
+    }
+
+    return () => {
+      if (timeoutId) clearTimeout(timeoutId);
+      if (intervalId) clearInterval(intervalId);
+    };
+  }, [images, isFullscreenOpen, staggerDelay]);
 
   if (images.length === 0) {
     return null;
   }
 
   return (
-    <div className={`${className} relative overflow-hidden bg-black/5 group/carousel`}>
+    <div className={`${className} ${className.includes('relative') || className.includes('absolute') ? '' : 'relative'} overflow-hidden bg-black/5 group/carousel`}>
       {images.map((img, index) => {
         if (index !== currentIndex) return null;
         return (
@@ -72,7 +97,7 @@ export default function ProjectCarousel({ project, className = "absolute inset-0
             key={`${img}-${index}`}
             src={img}
             alt={`${project.title} - imagen ${index + 1}`}
-            className={`absolute inset-0 w-full h-full object-cover animate-fade-in ${enableZoom ? 'cursor-zoom-in' : ''}`}
+            className={`absolute inset-0 w-full h-full ${objectFit === 'contain' ? 'object-contain bg-slate-950' : 'object-cover'} animate-fade-in ${enableZoom ? 'cursor-zoom-in' : ''}`}
             referrerPolicy="no-referrer"
             onClick={enableZoom ? (e) => {
               e.stopPropagation();
