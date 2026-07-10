@@ -461,53 +461,10 @@ async function startServer() {
       
       fs.writeFileSync(filePath, fileContent, "utf-8");
       console.log("Sincronizado correctamente initialPortfolioData.ts con los nuevos cambios e imágenes localizadas.");
-
-      // Save a JSON version for dynamic loading in production
-      try {
-        const jsonFilePath = path.join(process.cwd(), "src", "portfolioData.json");
-        fs.writeFileSync(jsonFilePath, JSON.stringify(data, null, 2), "utf-8");
-        console.log("Sincronizado correctamente portfolioData.json.");
-      } catch (jsonErr) {
-        console.error("Error al escribir portfolioData.json:", jsonErr);
-      }
-
       res.json({ success: true, data });
     } catch (error: any) {
       console.error("Error al escribir initialPortfolioData.ts:", error);
       res.status(500).json({ error: error.message || "Error al escribir initialPortfolioData.ts" });
-    }
-  });
-
-  // API Route: Get Portfolio Data dynamically
-  app.get("/api/portfolio-data", (req, res) => {
-    try {
-      const jsonPath = path.join(process.cwd(), "src", "portfolioData.json");
-      const tsPath = path.join(process.cwd(), "src", "initialPortfolioData.ts");
-      
-      if (fs.existsSync(jsonPath)) {
-        const content = fs.readFileSync(jsonPath, "utf-8");
-        res.json(JSON.parse(content));
-        return;
-      }
-      
-      if (fs.existsSync(tsPath)) {
-        const content = fs.readFileSync(tsPath, "utf-8");
-        const declarationIndex = content.indexOf("defaultPortfolioData");
-        if (declarationIndex !== -1) {
-          const startIndex = content.indexOf("{", declarationIndex);
-          const endIndex = content.lastIndexOf("}");
-          if (startIndex !== -1 && endIndex !== -1) {
-            const jsonStr = content.substring(startIndex, endIndex + 1);
-            res.json(JSON.parse(jsonStr));
-            return;
-          }
-        }
-      }
-      
-      res.json(null);
-    } catch (error: any) {
-      console.error("Error reading portfolio data dynamically:", error);
-      res.status(500).json({ error: error.message || "Error al obtener datos de portafolio." });
     }
   });
 
