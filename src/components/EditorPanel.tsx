@@ -63,6 +63,33 @@ export default function EditorPanel({ data, onPreview, onSave, onReset, onClose 
   const [uploadingProfile, setUploadingProfile] = useState(false);
   const [uploadingProjImg, setUploadingProjImg] = useState<{ idx: number; imgIdx: number } | null>(null);
   const [uploadError, setUploadError] = useState<string | null>(null);
+  const [editorWidth, setEditorWidth] = useState<'normal' | 'wide' | 'full'>(() => {
+    try {
+      const saved = localStorage.getItem('editorWidthMode');
+      if (saved === 'normal' || saved === 'wide' || saved === 'full') return saved;
+    } catch (e) {}
+    return 'wide'; // Default to wide for comfortable work!
+  });
+
+  const handleWidthChange = (mode: 'normal' | 'wide' | 'full') => {
+    setEditorWidth(mode);
+    try {
+      localStorage.setItem('editorWidthMode', mode);
+    } catch (e) {}
+  };
+
+  const getWidthClass = () => {
+    switch (editorWidth) {
+      case 'normal':
+        return 'max-w-lg';
+      case 'wide':
+        return 'max-w-3xl';
+      case 'full':
+        return 'max-w-5xl';
+      default:
+        return 'max-w-3xl';
+    }
+  };
 
   // Sync edits to parent in real-time for live preview (including uploaded files)
   React.useEffect(() => {
@@ -509,7 +536,7 @@ export default function EditorPanel({ data, onPreview, onSave, onReset, onClose 
   ];
 
   return (
-    <div className="fixed inset-y-0 right-0 z-50 w-full max-w-lg bg-[var(--surface-solid)] border-l border-[var(--line)] shadow-2xl flex flex-col transition-all duration-300">
+    <div className={`fixed inset-y-0 right-0 z-50 w-full ${getWidthClass()} bg-[var(--surface-solid)] border-l border-[var(--line)] shadow-2xl flex flex-col transition-all duration-300`}>
       
       {/* Header Panel */}
       <div className="px-6 py-5 border-b border-[var(--line)] flex items-center justify-between bg-gradient-to-r from-[var(--primary-soft)] to-transparent">
@@ -520,12 +547,52 @@ export default function EditorPanel({ data, onPreview, onSave, onReset, onClose 
             <p className="text-xs text-[var(--muted)] font-semibold mt-1">Configura y personaliza tu portafolio en vivo</p>
           </div>
         </div>
-        <button
-          onClick={onClose}
-          className="w-8 h-8 rounded-full border border-[var(--line)] flex items-center justify-center hover:bg-red-500/10 hover:text-red-500 hover:border-red-500/20 transition-all cursor-pointer"
-        >
-          <X className="w-4 h-4" />
-        </button>
+        
+        <div className="flex items-center gap-2">
+          {/* Controls for width */}
+          <div className="hidden sm:flex items-center gap-1 bg-slate-100 dark:bg-slate-800/60 p-1 rounded-xl border border-[var(--line)] mr-1" aria-label="Ancho del editor">
+            <button
+              onClick={() => handleWidthChange('normal')}
+              title="Ancho Estándar"
+              className={`px-2 py-1 rounded-lg text-[10px] font-bold transition-all cursor-pointer ${
+                editorWidth === 'normal'
+                  ? 'bg-[var(--surface-solid)] text-[var(--text)] shadow-xs border border-[var(--line)]'
+                  : 'text-[var(--muted)] hover:text-[var(--text)]'
+              }`}
+            >
+              Normal
+            </button>
+            <button
+              onClick={() => handleWidthChange('wide')}
+              title="Ancho Expandido"
+              className={`px-2 py-1 rounded-lg text-[10px] font-bold transition-all cursor-pointer ${
+                editorWidth === 'wide'
+                  ? 'bg-[var(--surface-solid)] text-[var(--text)] shadow-xs border border-[var(--line)]'
+                  : 'text-[var(--muted)] hover:text-[var(--text)]'
+              }`}
+            >
+              Grande
+            </button>
+            <button
+              onClick={() => handleWidthChange('full')}
+              title="Ancho Completo"
+              className={`px-2 py-1 rounded-lg text-[10px] font-bold transition-all cursor-pointer ${
+                editorWidth === 'full'
+                  ? 'bg-[var(--surface-solid)] text-[var(--text)] shadow-xs border border-[var(--line)]'
+                  : 'text-[var(--muted)] hover:text-[var(--text)]'
+              }`}
+            >
+              Completo
+            </button>
+          </div>
+
+          <button
+            onClick={onClose}
+            className="w-8 h-8 rounded-full border border-[var(--line)] flex items-center justify-center hover:bg-red-500/10 hover:text-red-500 hover:border-red-500/20 transition-all cursor-pointer"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
       </div>
 
       {/* Action shortcuts */}
