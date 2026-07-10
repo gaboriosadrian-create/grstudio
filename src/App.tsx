@@ -79,38 +79,61 @@ export default function App() {
 
     setIsAdmin(checkAdminMode());
 
-    // 3. Data init (IndexedDB is primary to handle large Base64 media files)
-    loadPortfolioData()
-      .then((savedData) => {
-        if (savedData) {
-          setData(savedData);
+    // 3. Data init (Dynamically load from the server's API first so that deployed changes are visible in production)
+    fetch('/api/portfolio-data')
+      .then((res) => {
+        if (res.ok) {
+          return res.json();
+        }
+        throw new Error('No se pudo cargar desde el servidor');
+      })
+      .then((serverData) => {
+        if (serverData) {
+          setData(serverData);
+          // Sync with IndexedDB for local offline/edit support
+          savePortfolioData(serverData).catch(console.error);
         } else {
-          // Fallback / Migrate from localStorage if it exists
+          loadFromLocal();
+        }
+      })
+      .catch((err) => {
+        console.warn('Cargando desde almacenamiento local debido a:', err);
+        loadFromLocal();
+      });
+
+    function loadFromLocal() {
+      loadPortfolioData()
+        .then((savedData) => {
+          if (savedData) {
+            setData(savedData);
+          } else {
+            // Fallback / Migrate from localStorage if it exists
+            try {
+              const legacyData = localStorage.getItem('user_portfolio_data');
+              if (legacyData) {
+                const parsed = JSON.parse(legacyData);
+                setData(parsed);
+                // Migrate it to IndexedDB so it's safely stored going forward
+                savePortfolioData(parsed).catch(console.error);
+              }
+            } catch (e) {
+              // Ignore
+            }
+          }
+        })
+        .catch((err) => {
+          console.error('Error al cargar datos desde IndexedDB:', err);
+          // Fallback to localStorage on error
           try {
             const legacyData = localStorage.getItem('user_portfolio_data');
             if (legacyData) {
-              const parsed = JSON.parse(legacyData);
-              setData(parsed);
-              // Migrate it to IndexedDB so it's safely stored going forward
-              savePortfolioData(parsed).catch(console.error);
+              setData(JSON.parse(legacyData));
             }
           } catch (e) {
             // Ignore
           }
-        }
-      })
-      .catch((err) => {
-        console.error('Error al cargar datos desde IndexedDB:', err);
-        // Fallback to localStorage on error
-        try {
-          const legacyData = localStorage.getItem('user_portfolio_data');
-          if (legacyData) {
-            setData(JSON.parse(legacyData));
-          }
-        } catch (e) {
-          // Ignore
-        }
-      });
+        });
+    }
   }, []);
 
   // Theme change handler
