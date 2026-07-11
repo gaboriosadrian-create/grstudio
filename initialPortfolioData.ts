@@ -10,7 +10,7 @@ export const defaultPortfolioData: PortfolioData = {
     "whatsappMessage": "Hola Gabriel, quiero mejorar mi contenido para redes",
     "instagram": "@gabrielriosok",
     "tiktok": "@tuusuario",
-    "linkedin": "www.linkedin.com/in/gabriel-rios-adrian",
+    "linkedin": "www.linkedin.com/in/gabriel-rios-adrian/",
     "logoUrl": "/images/logo/logo_1783457905492_visual_creator.png",
     "profilePhotoUrl": "/images/perfil/mi_foto_real.png"
   },
