@@ -4,7 +4,7 @@ export const defaultPortfolioData: PortfolioData = {
   "profile": {
     "name": "Gabriel Rios",
     "initials": "GR",
-    "role": "Creador de contenido personal",
+    "role": "Visual Creator",
     "email": "gaboriosadrian@gmail.com",
     "phone": "+54 9 2617486990",
     "whatsappMessage": "Hola Gabriel, quiero mejorar mi contenido para redes",
@@ -95,8 +95,8 @@ export const defaultPortfolioData: PortfolioData = {
   "projects": [
     {
       "id": "p1",
-      "title": "Serie: “Vacaciones de invierno”",
-      "description": "Reels con hook, estructura clara y CTA para generar comentarios y mensajes privados.",
+      "title": "Reels creativos",
+      "description": "Creamos Reels con hooks que captan la atención en los primeros segundos, una estructura diseñada para mantener el interés y llamados a la acción que impulsan comentarios, mensajes privados y nuevas oportunidades de venta.\n\nEste reel fue generado con IA a partir de fotos, y animadas sin necesidad de esforzarse en realizar un proceso de grabación con personas reales. 🎥🤖",
       "categories": [
         "reels",
         "copy"
@@ -109,16 +109,20 @@ export const defaultPortfolioData: PortfolioData = {
         "Guion",
         "CTA"
       ],
-      "videoUrl": "https://github.com/gaboriosadrian-create/grstudio/blob/main/public/images/portfolio/portfolio_1783526665882_portfolio_1783458149488_vacaciones_de_invierno_reel1.mp4",
+      "videoUrl": "/images/portfolio/1-ReelVideo.mp4",
       "imageUrls": [
-        "/images/portfolio/1-Vacaciones.png"
+        "",
+        "",
+        "",
+        "",
+        ""
       ],
-      "imageUrl": "/images/portfolio/1-Vacaciones.png"
+      "imageUrl": ""
     },
     {
       "id": "p2",
       "title": "Alquimia visual",
-      "description": "Conoce el proceso de transformación de una fotografía común en una imagen de alto impacto. Manteniendo el producto original, se mejoran escenarios, iluminación y composición para obtener un resultado más atractivo y profesional.",
+      "description": "Transformamos fotografías comunes en imágenes de alto impacto, mejorando la iluminación, la composición y el entorno sin alterar el producto. El resultado son fotografías más atractivas, profesionales y pensadas para captar la atención y generar más ventas.\n\nEl producto es excelente, eso no hay duda, pero visualmente necesita un cambio para atraer tu audiencia🤩🖼️",
       "categories": [
         "foto",
         "marca"
@@ -133,13 +137,16 @@ export const defaultPortfolioData: PortfolioData = {
       "imageUrls": [
         "/images/portfolio/2-Alquimia1.jpeg",
         "/images/portfolio/2-alquimia2.png",
-        "/images/portfolio/2-Alquimia3.png"
-      ]
+        "/images/portfolio/2-Alquimia3.png",
+        "/images/portfolio/2-Alquimia4.png",
+        "/images/portfolio/2-Alquimia5.png"
+      ],
+      "videoUrl": ""
     },
     {
       "id": "p3",
-      "title": "Mapa de identidad y tono de voz",
-      "description": "Definición de mensaje principal, promesa, valores visuales y frases clave de la marca.",
+      "title": "Mapa de identidad y Planificación",
+      "description": "Creamos una identidad de marca sólida definiendo tu mensaje, tono de comunicación y estilo visual. Diseñamos un sistema coherente de logotipo, colores y tipografías para que tu contenido sea profesional, reconocible y genere mayor confianza en tu audiencia. 💡📘✅",
       "categories": [
         "marca",
         "copy"
@@ -155,13 +162,16 @@ export const defaultPortfolioData: PortfolioData = {
       "imageUrls": [
         "/images/portfolio/3-Posicionamiento1.jpg",
         "/images/portfolio/3-Posicionamiento2.png",
-        "/images/portfolio/3-Posicionamiento3.png"
-      ]
+        "/images/portfolio/3-Posicionamiento3.png",
+        "/images/portfolio/3-Posicionamiento4.png",
+        "/images/portfolio/3-Posicionamiento5.png"
+      ],
+      "videoUrl": ""
     },
     {
       "id": "p4",
-      "title": "Biografía optimizada para Instagram",
-      "description": "Texto claro para explicar qué haces, para quién trabajas y qué acción debe tomar tu audiencia.",
+      "title": "Biografía optimizada",
+      "description": "Analizamos y optimizamos cada detalle de tu perfil para que sea más fácil de encontrar, genere confianza y convierta visitas en clientes. Mejoramos la biografía, el posicionamiento en búsquedas, los enlaces, el orden de la información, los botones de contacto y aplicamos ajustes estratégicos para potenciar el rendimiento de tu perfil y facilitar que tu audiencia tome acción. 🎯🚀",
       "categories": [
         "copy",
         "marca"
@@ -171,19 +181,23 @@ export const defaultPortfolioData: PortfolioData = {
       "colorType": "copy",
       "tags": [
         "Bio",
-        "Copy"
+        "Copy",
+        "Estrategia"
       ],
       "imageUrl": "/images/portfolio/4-Perfil1.png",
       "imageUrls": [
         "/images/portfolio/4-Perfil1.png",
         "/images/portfolio/4-Perfil2.png",
-        "/images/portfolio/4-Perfil3.png"
-      ]
+        "/images/portfolio/4-Perfil3.png",
+        "/images/portfolio/4-Perfil4.png",
+        ""
+      ],
+      "videoUrl": ""
     },
     {
       "id": "p5",
       "title": "Diseños para Redes Sociales",
-      "description": "Publicaciones creadas para comunicar, atraer y generar interacción. Cada diseño sigue una estrategia visual coherente con la identidad de la marca para lograr una presencia profesional en redes sociales.",
+      "description": "Creamos publicaciones estratégicas que captan la atención, comunican con claridad y generan interacción. Cada pieza se diseña alineada con la identidad de tu marca para fortalecer tu presencia en redes y convertir seguidores en potenciales clientes.  👑🙋‍♀️❤️",
       "categories": [
         "marca"
       ],
@@ -197,13 +211,16 @@ export const defaultPortfolioData: PortfolioData = {
       "imageUrls": [
         "/images/portfolio/5-Wow1.png",
         "/images/portfolio/5-Wow2.png",
-        "/images/portfolio/5-Wow3.png"
-      ]
+        "/images/portfolio/5-Wow3.png",
+        "",
+        ""
+      ],
+      "videoUrl": ""
     },
     {
       "id": "p6",
-      "title": "Carrusel",
-      "description": "Contenido paso a paso diseñado para educar, aportar valor y atraer clientes potenciales.",
+      "title": "Carrusel + Historias",
+      "description": "Diseñamos carruseles que educan, generan valor y mantienen la atención de tu audiencia hasta el último slide. Cada publicación incluye un copy persuasivo y una estructura pensada para aumentar la interacción, atraer clientes potenciales y generar más ventas. 🥰🛒",
       "categories": [
         "foto",
         "copy"
@@ -219,8 +236,11 @@ export const defaultPortfolioData: PortfolioData = {
       "imageUrls": [
         "/images/portfolio/6-Carrusel1.png",
         "/images/portfolio/6-Carrusel2.png",
-        "/images/portfolio/6-Carrusel3.png"
-      ]
+        "/images/portfolio/6-Carrusel3.png",
+        "",
+        ""
+      ],
+      "videoUrl": ""
     }
   ],
   "steps": [

@@ -116,7 +116,7 @@ export default function Portfolio({ projects }: PortfolioProps) {
             >
               {/* Card Media Header */}
               <div className="relative h-[448px] flex flex-col justify-between p-6 overflow-hidden">
-                {project.imageUrl || (project.imageUrls && project.imageUrls.length > 0) ? (
+                {project.imageUrl || (project.imageUrls && project.imageUrls.some(url => url && url.trim() !== '')) ? (
                   <>
                     <ProjectCarousel project={project} staggerDelay={index * 4000} />
                   </>

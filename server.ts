@@ -12,7 +12,7 @@ const __dirname = hasImportMeta ? path.dirname(__filename) : "";
 
 async function startServer() {
   const app = express();
-  const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;
+  const PORT = 3000;
 
   // Ensure source persistent directories exist
   const srcImagesDir = path.join(process.cwd(), "src", "images");
@@ -212,58 +212,8 @@ async function startServer() {
 
     // Case 2: External HTTP/HTTPS URL
     if (trimmed.startsWith("http://") || trimmed.startsWith("https://")) {
-      try {
-        console.log(`Downloading external image: ${trimmed}`);
-        const res = await fetch(trimmed);
-        if (res.ok) {
-          const arrayBuffer = await res.arrayBuffer();
-          const buffer = Buffer.from(arrayBuffer);
-          
-          try {
-            const urlPath = new URL(trimmed).pathname;
-            const parsedExt = path.extname(urlPath);
-            if (parsedExt && parsedExt.length > 1) {
-              ext = parsedExt.substring(1).toLowerCase();
-            }
-          } catch (e) {
-            // fallback
-          }
-
-          const filename = `${baseName}.${ext}`;
-          const destPath = path.join(imagesDir, filename);
-          const srcDestPath = path.join(srcImagesDir, filename);
-
-          // Delete other file extensions before writing (to avoid orphan files)
-          try {
-            const dirsToClean = [imagesDir, srcImagesDir];
-            for (const d of dirsToClean) {
-              if (fs.existsSync(d)) {
-                const files = fs.readdirSync(d);
-                for (const f of files) {
-                  const fExt = path.extname(f).toLowerCase();
-                  const fBase = path.basename(f, fExt);
-                  if (fBase === baseName && fExt !== `.${ext}`) {
-                    const oldPath = path.join(d, f);
-                    fs.unlinkSync(oldPath);
-                    console.log(`Deleted orphan/old file with different extension in saveImageLocally: ${oldPath}`);
-                  }
-                }
-              }
-            }
-          } catch (e) {
-            console.error("Error unlinking old file in saveImageLocally:", e);
-          }
-
-          fs.writeFileSync(destPath, buffer);
-          fs.writeFileSync(srcDestPath, buffer);
-          console.log(`Successfully downloaded and saved external image to public and src: /images/${folderName}/${filename}`);
-          return `/images/${folderName}/${filename}`;
-        } else {
-          console.warn(`Failed to download external image: ${trimmed}. Status: ${res.statusText}`);
-        }
-      } catch (err) {
-        console.error(`Error downloading external image ${trimmed}:`, err);
-      }
+      console.log(`Preserving external URL directly: ${trimmed}`);
+      return trimmed;
     }
 
     // Case 3: Local uploads path (uploaded during current session)
@@ -276,7 +226,7 @@ async function startServer() {
           if (parsedExt && parsedExt.length > 1) {
             ext = parsedExt.substring(1);
           }
-          const localFilename = `${baseName}.${ext}`;
+          const localFilename = filename;
           const destPath = path.join(imagesDir, localFilename);
           const srcDestPath = path.join(srcImagesDir, localFilename);
 
@@ -426,9 +376,13 @@ async function startServer() {
       if (data.profile) {
         if (data.profile.logoUrl) {
           data.profile.logoUrl = await saveImageLocally(data.profile.logoUrl, "logo");
+        } else {
+          data.profile.logoUrl = "";
         }
         if (data.profile.profilePhotoUrl) {
           data.profile.profilePhotoUrl = await saveImageLocally(data.profile.profilePhotoUrl, "perfil");
+        } else {
+          data.profile.profilePhotoUrl = "";
         }
       }
 
@@ -437,22 +391,39 @@ async function startServer() {
         for (let i = 0; i < data.projects.length; i++) {
           const project = data.projects[i];
           const pId = project.id || `index-${i}`;
-          if (project.imageUrl) {
-            project.imageUrl = await saveImageLocally(project.imageUrl, "portfolio", pId, "0", "image");
-          }
+          
           if (project.videoUrl) {
             project.videoUrl = await saveImageLocally(project.videoUrl, "portfolio", pId, "0", "video");
+          } else {
+            project.videoUrl = "";
           }
+          
+          let urls: string[] = [];
           if (Array.isArray(project.imageUrls)) {
-            const processedUrls: string[] = [];
-            for (let j = 0; j < project.imageUrls.length; j++) {
-              if (project.imageUrls[j]) {
-                const localUrl = await saveImageLocally(project.imageUrls[j], "portfolio", pId, j.toString(), "image");
-                processedUrls.push(localUrl);
-              }
-            }
-            project.imageUrls = processedUrls;
+            urls = [...project.imageUrls];
           }
+          
+          // Ensure exactly 5 URLs are processed and saved
+          while (urls.length < 5) {
+            urls.push("");
+          }
+          if (urls.length > 5) {
+            urls = urls.slice(0, 5);
+          }
+          
+          const processedUrls: string[] = [];
+          for (let j = 0; j < 5; j++) {
+            const url = urls[j];
+            if (url) {
+              const localUrl = await saveImageLocally(url, "portfolio", pId, j.toString(), "image");
+              processedUrls.push(localUrl);
+            } else {
+              processedUrls.push("");
+            }
+          }
+          project.imageUrls = processedUrls;
+          // Set primary imageUrl to the first non-empty URL, or empty if none
+          project.imageUrl = processedUrls.find(Boolean) || "";
         }
       }
       

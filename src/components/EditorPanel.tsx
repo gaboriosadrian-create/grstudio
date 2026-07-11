@@ -34,9 +34,14 @@ const cleanPortfolioData = (data: PortfolioData): PortfolioData => {
   if (Array.isArray(copy.projects)) {
     copy.projects = copy.projects.map((proj: any) => {
       if (proj.imageUrl) proj.imageUrl = cleanImageUrl(proj.imageUrl);
-      if (Array.isArray(proj.imageUrls)) {
-        proj.imageUrls = proj.imageUrls.map((u: string) => cleanImageUrl(u));
+      let urls = Array.isArray(proj.imageUrls) ? proj.imageUrls.map((u: string) => cleanImageUrl(u)) : [];
+      while (urls.length < 5) {
+        urls.push('');
       }
+      if (urls.length > 5) {
+        urls = urls.slice(0, 5);
+      }
+      proj.imageUrls = urls;
       return proj;
     });
   }
@@ -268,21 +273,16 @@ export default function EditorPanel({ data, onPreview, onSave, onReset, onClose 
         const proj = { ...newProjects[projIdx] };
         
         // Ensure imageUrls array exists
-        const currentImages = proj.imageUrls ? [...proj.imageUrls] : [];
-        if (currentImages.length === 0 && proj.imageUrl) {
-          currentImages.push(proj.imageUrl);
-        }
-        
-        // Fill up elements if needed
-        while (currentImages.length <= imgIdx) {
+        const currentImages = proj.imageUrls ? [...proj.imageUrls] : ["", "", "", "", ""];
+        while (currentImages.length < 5) {
           currentImages.push('');
         }
         
         currentImages[imgIdx] = result.url;
         
-        proj.imageUrls = currentImages.filter(Boolean); // Keep only non-empty
+        proj.imageUrls = currentImages.slice(0, 5);
         // set the first image as fallback primary imageUrl
-        proj.imageUrl = currentImages[0] || '';
+        proj.imageUrl = currentImages.find(Boolean) || '';
         
         newProjects[projIdx] = proj;
         setEditedData((prev) => ({
@@ -299,18 +299,14 @@ export default function EditorPanel({ data, onPreview, onSave, onReset, onClose 
         const newProjects = [...editedData.projects];
         const proj = { ...newProjects[projIdx] };
         
-        const currentImages = proj.imageUrls ? [...proj.imageUrls] : [];
-        if (currentImages.length === 0 && proj.imageUrl) {
-          currentImages.push(proj.imageUrl);
-        }
-        
-        while (currentImages.length <= imgIdx) {
+        const currentImages = proj.imageUrls ? [...proj.imageUrls] : ["", "", "", "", ""];
+        while (currentImages.length < 5) {
           currentImages.push('');
         }
         
         currentImages[imgIdx] = base64Url;
-        proj.imageUrls = currentImages.filter(Boolean);
-        proj.imageUrl = currentImages[0] || '';
+        proj.imageUrls = currentImages.slice(0, 5);
+        proj.imageUrl = currentImages.find(Boolean) || '';
         
         newProjects[projIdx] = proj;
         setEditedData((prev) => ({
@@ -329,19 +325,15 @@ export default function EditorPanel({ data, onPreview, onSave, onReset, onClose 
     const cleanedValue = cleanImageUrl(value);
     const newProjects = [...editedData.projects];
     const proj = { ...newProjects[projIdx] };
-    const currentImages = proj.imageUrls ? [...proj.imageUrls] : [];
-    if (currentImages.length === 0 && proj.imageUrl) {
-      currentImages.push(proj.imageUrl);
-    }
-    
-    while (currentImages.length <= imgIdx) {
+    const currentImages = proj.imageUrls ? [...proj.imageUrls] : ["", "", "", "", ""];
+    while (currentImages.length < 5) {
       currentImages.push('');
     }
     
     currentImages[imgIdx] = cleanedValue;
     
-    proj.imageUrls = currentImages.filter(Boolean);
-    proj.imageUrl = currentImages[0] || '';
+    proj.imageUrls = currentImages.slice(0, 5);
+    proj.imageUrl = currentImages.find(Boolean) || '';
     
     newProjects[projIdx] = proj;
     setEditedData((prev) => ({
@@ -353,17 +345,15 @@ export default function EditorPanel({ data, onPreview, onSave, onReset, onClose 
   const handleRemoveProjectImage = (projIdx: number, imgIdx: number) => {
     const newProjects = [...editedData.projects];
     const proj = { ...newProjects[projIdx] };
-    const currentImages = proj.imageUrls ? [...proj.imageUrls] : [];
-    if (currentImages.length === 0 && proj.imageUrl) {
-      currentImages.push(proj.imageUrl);
+    const currentImages = proj.imageUrls ? [...proj.imageUrls] : ["", "", "", "", ""];
+    while (currentImages.length < 5) {
+      currentImages.push('');
     }
     
-    if (imgIdx < currentImages.length) {
-      currentImages.splice(imgIdx, 1);
-    }
+    currentImages[imgIdx] = '';
     
-    proj.imageUrls = currentImages.filter(Boolean);
-    proj.imageUrl = currentImages[0] || '';
+    proj.imageUrls = currentImages.slice(0, 5);
+    proj.imageUrl = currentImages.find(Boolean) || '';
     
     newProjects[projIdx] = proj;
     setEditedData((prev) => ({
