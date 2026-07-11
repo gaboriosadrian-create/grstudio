@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Save, RotateCcw, Copy, Check, Users, Sparkles, Sliders, DollarSign, Award, Briefcase, Grid, Trash2, Plus, Upload, Loader2 } from 'lucide-react';
+import { X, Save, RotateCcw, Copy, Check, Users, Sparkles, Sliders, DollarSign, Award, Briefcase, Grid, Trash2, Plus, Upload, Loader2, Download } from 'lucide-react';
 import { PortfolioData, Project } from '../types';
 import { formatMediaUrl } from '../utils';
 
@@ -454,7 +454,7 @@ export default function EditorPanel({ data, onPreview, onSave, onReset, onClose 
     }));
   };
 
-  const handlePlanChange = (index: number, key: 'title' | 'price' | 'description', value: string) => {
+  const handlePlanChange = (index: number, key: 'title' | 'price' | 'description' | 'bonusWarranty', value: string) => {
     const newPlans = [...editedData.plans];
     newPlans[index] = { ...newPlans[index], [key]: value };
     setEditedData((prev) => ({
@@ -592,6 +592,21 @@ export default function EditorPanel({ data, onPreview, onSave, onReset, onClose 
           className="px-4 py-2 bg-gradient-to-br from-[var(--primary)] to-[var(--secondary)] hover:opacity-90 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 cursor-pointer shadow-md shadow-[rgba(255,107,53,0.15)] transition-all"
         >
           <Save className="w-3.5 h-3.5" /> Guardar Cambios
+        </button>
+        <button
+          onClick={handleDownloadDefaultData}
+          className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 cursor-pointer transition-all shadow-md shadow-green-500/10"
+          title="Descargar archivo initialPortfolioData.ts con los datos actuales"
+        >
+          <Download className="w-3.5 h-3.5" /> Descargar .TS
+        </button>
+        <button
+          onClick={handleCopyDefaultData}
+          className="px-4 py-2 bg-[var(--surface)] text-[var(--text)] border border-[var(--line)] rounded-xl text-xs font-bold flex items-center gap-1.5 cursor-pointer transition-all hover:bg-slate-100 dark:hover:bg-slate-800"
+          title="Copiar código TypeScript para initialPortfolioData.ts"
+        >
+          {copyDataSuccess ? <Check className="w-3.5 h-3.5 text-green-500" /> : <Copy className="w-3.5 h-3.5" />}
+          {copyDataSuccess ? '¡Código Copiado!' : 'Copiar Código .TS'}
         </button>
         <button
           onClick={handleCopyJSON}
@@ -1323,6 +1338,19 @@ export default function EditorPanel({ data, onPreview, onSave, onReset, onClose 
                     value={plan.description}
                     onChange={(e) => handlePlanChange(planIdx, 'description', e.target.value)}
                     className="px-3 py-1.5 border border-[var(--line)] rounded-xl text-sm bg-[var(--surface-2)] text-[var(--text)] outline-none focus:border-[var(--primary)]"
+                  />
+                </div>
+
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-[10px] font-bold text-blue-600 dark:text-blue-400 uppercase flex items-center gap-1">
+                    🎁 Bonus & garantía (Sección Desplegable Azul)
+                  </label>
+                  <textarea
+                    rows={3}
+                    value={plan.bonusWarranty || ''}
+                    onChange={(e) => handlePlanChange(planIdx, 'bonusWarranty', e.target.value)}
+                    placeholder="Ej: 🎁 BONUS: Auditoría completa de tu perfil...\n🛡️ GARANTÍA: Satisfacción de 15 días..."
+                    className="px-3 py-1.5 border border-[var(--line)] rounded-xl text-sm bg-[var(--surface-2)] text-[var(--text)] outline-none focus:border-[var(--primary)] resize-y"
                   />
                 </div>
 

@@ -42,6 +42,7 @@ export interface PricePlan {
   features: string[];
   featured: boolean;
   buttonText: string;
+  bonusWarranty?: string;
 }
 
 export interface ProfileInfo {

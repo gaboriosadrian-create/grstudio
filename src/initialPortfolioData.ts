@@ -5,7 +5,7 @@ export const defaultPortfolioData: PortfolioData = {
     "name": "Gabriel Rios",
     "initials": "GR",
     "role": "Visual Creator",
-    "email": "gaboriosadrian@gmail.com",
+    "email": "gabrielriosgrstudio@gmail.com",
     "phone": "+54 9 2617486990",
     "whatsappMessage": "Hola Gabriel, quiero mejorar mi contenido para redes",
     "instagram": "@gabrielriosok",
@@ -283,7 +283,8 @@ export const defaultPortfolioData: PortfolioData = {
         "Optimización de bio y perfil"
       ],
       "featured": false,
-      "buttonText": "Elegir Arranque"
+      "buttonText": "Elegir Arranque",
+      "bonusWarranty": "✅ Kit de hashtags personalizados para tu negocio.\n✅ Banco de 20 ideas de contenido para publicar durante el mes.\n✅ Guía rápida de buenas prácticas para Instagram (PDF).\n✅ 30 minutos de asesoría estratégica al comenzar el proyecto."
     },
     {
       "id": "pl2",
@@ -298,7 +299,8 @@ export const defaultPortfolioData: PortfolioData = {
         "Calendario + sugerencias de historias"
       ],
       "featured": true,
-      "buttonText": "Elegir Crecimiento"
+      "buttonText": "Elegir Crecimiento",
+      "bonusWarranty": "✅ Auditoría inicial de redes sociales con recomendaciones de mejora.\n✅ Banco de 50 ideas de contenido adaptadas a la marca.\n✅ Plantillas editables para historias (Canva) listas para reutilizar.\n✅ Análisis mensual de métricas con recomendaciones para el siguiente mes.\n✅ Guía de tendencias y audios en tendencia para potenciar los Reels."
     },
     {
       "id": "pl3",
@@ -313,7 +315,8 @@ export const defaultPortfolioData: PortfolioData = {
         "Estrategia y revisión mensual"
       ],
       "featured": false,
-      "buttonText": "Elegir Premium"
+      "buttonText": "Elegir Premium",
+      "bonusWarranty": "✅ Manual de identidad para redes (tono de comunicación, estilo visual y lineamientos de contenido).\n✅ Banco de 100 ideas de contenido personalizadas para publicar durante los próximos meses.\n✅ Calendario estratégico con fechas comerciales y oportunidades relevantes para la marca.\n✅ Prioridad en la atención y respuesta por WhatsApp.\n✅ Acceso anticipado a nuevas plantillas, formatos y tendencias que implemente en mis servicios.\n✅ 1 pieza de contenido extra de regalo por mes para aprovechar una tendencia, promoción o lanzamiento."
     }
   ]
 };

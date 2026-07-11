@@ -1,12 +1,107 @@
-import React from 'react';
-import { Check, Sparkles } from 'lucide-react';
+import React, { useState } from 'react';
+import { Check, Sparkles, ChevronDown } from 'lucide-react';
 import { PricePlan } from '../types';
 
 interface PricingProps {
   plans: PricePlan[];
 }
 
+function PricingCard({ 
+  plan, 
+  isExpanded, 
+  onToggle 
+}: { 
+  plan: PricePlan; 
+  isExpanded: boolean; 
+  onToggle: () => void; 
+  key?: React.Key;
+}) {
+  return (
+    <article
+      className={`relative flex flex-col p-8 border rounded-[32px] bg-[var(--surface)] shadow-sm hover:shadow-xl transition-all duration-300 ${
+        plan.featured
+          ? 'border-[rgba(255,107,53,0.48)] shadow-[0_30px_80px_rgba(255,107,53,0.2)] lg:-translate-y-3 z-10'
+          : 'border-[var(--line)]'
+      }`}
+    >
+      {/* Featured Badge */}
+      {plan.featured && (
+        <span className="absolute top-5 right-5 px-3 py-1 rounded-full text-[10px] font-black text-white bg-gradient-to-r from-[var(--primary)] to-[var(--secondary)] flex items-center gap-1 shadow-sm">
+          <Sparkles className="w-3 h-3" /> MÁS ELEGIDO
+        </span>
+      )}
+
+      {/* Title */}
+      <h3 className="font-display font-bold text-2xl text-[var(--text)] tracking-tight">
+        {plan.title}
+      </h3>
+
+      {/* Price */}
+      <div className="flex items-baseline mt-5 mb-2">
+        <span className="text-4xl sm:text-5xl font-extrabold font-display tracking-tight text-[var(--text)]">
+          {plan.price}
+        </span>
+        <span className="text-[var(--muted)] text-sm font-bold ml-2">
+          {plan.period}
+        </span>
+      </div>
+
+      {/* Description */}
+      <p className="text-[var(--muted)] text-sm leading-relaxed mb-6">
+        {plan.description}
+      </p>
+
+      {/* Separation line */}
+      <div className="h-px bg-[var(--line)] w-full mb-6" />
+
+      {/* Features List */}
+      <ul className="space-y-3.5 mb-6 flex-grow">
+        {plan.features.map((feature, fIdx) => (
+          <li key={fIdx} className="flex items-start gap-2.5 text-sm sm:text-base text-[var(--muted)] font-semibold">
+            <Check className="w-4 h-4 text-[var(--accent)] mt-1 flex-shrink-0" />
+            <span>{feature}</span>
+          </li>
+        ))}
+      </ul>
+
+      {/* Collapsible "+ Bonus & garantía" Section */}
+      {plan.bonusWarranty && plan.bonusWarranty.trim() !== '' && (
+        <div className="mb-6 w-full text-left">
+          <button
+            type="button"
+            onClick={onToggle}
+            className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-extrabold text-xs sm:text-sm flex items-center gap-1 cursor-pointer transition-colors focus:outline-none"
+          >
+            <span>{isExpanded ? '- Ocultar' : '+'} Bonus & garantía</span>
+            <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`} />
+          </button>
+          
+          {isExpanded && (
+            <div className="mt-2.5 p-3.5 rounded-xl bg-blue-50/60 dark:bg-blue-950/20 border-l-2 border-blue-500 text-xs text-[var(--muted)] leading-relaxed whitespace-pre-line animate-fade-in font-medium animate-[fadeIn_0.2s_ease-out]">
+              {plan.bonusWarranty}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Plan CTA button */}
+      <a
+        href="#contacto"
+        className={`w-full inline-flex items-center justify-center h-12 rounded-full font-extrabold text-sm transition-all duration-200 cursor-pointer ${
+          plan.featured
+            ? 'text-white bg-gradient-to-br from-[var(--primary)] to-[var(--secondary)] shadow-md shadow-[rgba(255,107,53,0.2)] hover:-translate-y-0.5 hover:shadow-lg'
+            : 'text-[var(--text)] bg-[var(--surface)] border border-[var(--line)] shadow-sm hover:-translate-y-0.5'
+        }`}
+      >
+        {plan.buttonText || `Elegir ${plan.title}`}
+      </a>
+    </article>
+  );
+}
+
 export default function Pricing({ plans }: PricingProps) {
+  const [isExpanded, setIsExpanded] = useState(false);
+
   return (
     <section className="py-20 bg-gradient-to-b from-transparent via-[var(--surface-2)] to-transparent" id="planes">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -27,67 +122,30 @@ export default function Pricing({ plans }: PricingProps) {
         {/* Pricing Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-stretch mb-16">
           {plans.map((plan) => (
-            <article
-              key={plan.id}
-              className={`relative flex flex-col p-8 border rounded-[32px] bg-[var(--surface)] shadow-sm hover:shadow-xl transition-all duration-300 ${
-                plan.featured
-                  ? 'border-[rgba(255,107,53,0.48)] shadow-[0_30px_80px_rgba(255,107,53,0.2)] lg:-translate-y-3 z-10'
-                  : 'border-[var(--line)]'
-              }`}
-            >
-              {/* Featured Badge */}
-              {plan.featured && (
-                <span className="absolute top-5 right-5 px-3 py-1 rounded-full text-[10px] font-black text-white bg-gradient-to-r from-[var(--primary)] to-[var(--secondary)] flex items-center gap-1 shadow-sm">
-                  <Sparkles className="w-3 h-3" /> MÁS ELEGIDO
-                </span>
-              )}
-
-              {/* Title */}
-              <h3 className="font-display font-bold text-2xl text-[var(--text)] tracking-tight">
-                {plan.title}
-              </h3>
-
-              {/* Price */}
-              <div className="flex items-baseline mt-5 mb-2">
-                <span className="text-4xl sm:text-5xl font-extrabold font-display tracking-tight text-[var(--text)]">
-                  {plan.price}
-                </span>
-                <span className="text-[var(--muted)] text-sm font-bold ml-2">
-                  {plan.period}
-                </span>
-              </div>
-
-              {/* Description */}
-              <p className="text-[var(--muted)] text-sm leading-relaxed mb-6">
-                {plan.description}
-              </p>
-
-              {/* Separation line */}
-              <div className="h-px bg-[var(--line)] w-full mb-6" />
-
-              {/* Features List */}
-              <ul className="space-y-3.5 mb-8 flex-grow">
-                {plan.features.map((feature, fIdx) => (
-                  <li key={fIdx} className="flex items-start gap-2.5 text-sm sm:text-base text-[var(--muted)] font-semibold">
-                    <Check className="w-4 h-4 text-[var(--accent)] mt-1 flex-shrink-0" />
-                    <span>{feature}</span>
-                  </li>
-                ))}
-              </ul>
-
-              {/* Plan CTA button */}
-              <a
-                href="#contacto"
-                className={`w-full inline-flex items-center justify-center h-12 rounded-full font-extrabold text-sm transition-all duration-200 cursor-pointer ${
-                  plan.featured
-                    ? 'text-white bg-gradient-to-br from-[var(--primary)] to-[var(--secondary)] shadow-md shadow-[rgba(255,107,53,0.2)] hover:-translate-y-0.5 hover:shadow-lg'
-                    : 'text-[var(--text)] bg-[var(--surface)] border border-[var(--line)] shadow-sm hover:-translate-y-0.5'
-                }`}
-              >
-                {plan.buttonText || `Elegir ${plan.title}`}
-              </a>
-            </article>
+            <PricingCard 
+              key={plan.id} 
+              plan={plan} 
+              isExpanded={isExpanded} 
+              onToggle={() => setIsExpanded(!isExpanded)} 
+            />
           ))}
+        </div>
+
+        {/* Garantía de satisfacción */}
+        <div className="mb-16 p-8 sm:p-10 rounded-[36px] border border-blue-100 dark:border-blue-900/50 bg-gradient-to-br from-blue-50/40 via-indigo-50/20 to-sky-50/30 dark:from-blue-950/20 dark:via-slate-950/10 dark:to-sky-950/10 text-center shadow-sm relative overflow-hidden">
+          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 via-[var(--primary)] to-[var(--secondary)]" />
+          <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-blue-100/80 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 mb-4 shadow-inner">
+            <span className="text-2xl">🛡️</span>
+          </div>
+          <h3 className="font-display font-bold text-xl sm:text-2xl text-[var(--text)] tracking-tight mb-4">
+            Garantía de satisfacción
+          </h3>
+          <p className="text-[var(--muted)] text-sm sm:text-base leading-relaxed mb-4 max-w-4xl mx-auto font-medium">
+            Quiero que estés conforme con el contenido que recibe tu marca. Si alguna pieza no refleja la identidad de tu negocio, realizaremos los ajustes necesarios hasta que quede alineada con el estilo y objetivo definidos al inicio del proyecto.
+          </p>
+          <p className="text-blue-600 dark:text-blue-400 text-sm sm:text-base leading-relaxed font-bold max-w-4xl mx-auto">
+            Además, me comprometo a cumplir los tiempos de entrega acordados y mantener una comunicación constante durante todo el proceso.
+          </p>
         </div>
 
         {/* CTA Middle Block */}

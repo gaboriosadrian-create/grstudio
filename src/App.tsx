@@ -14,6 +14,7 @@ import Process from './components/Process';
 import Pricing from './components/Pricing';
 import Contact from './components/Contact';
 import EditorPanel from './components/EditorPanel';
+import LegalDocsModal, { LegalDocKey } from './components/LegalDocsModal';
 
 export default function App() {
   const [data, setData] = useState<PortfolioData>(defaultPortfolioData);
@@ -22,6 +23,8 @@ export default function App() {
   const [copied, setCopied] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
+  const [isLegalOpen, setIsLegalOpen] = useState(false);
+  const [activeLegalDoc, setActiveLegalDoc] = useState<LegalDocKey>('privacidad');
 
   // Initialize theme and portfolio data on load
   useEffect(() => {
@@ -282,39 +285,89 @@ export default function App() {
       </main>
 
       {/* Footer copyright and socials */}
-      <footer className="border-t border-[var(--line)] py-10 bg-transparent">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-6">
-          <p className="text-[var(--muted)] text-sm font-semibold text-center sm:text-left">
-            © {new Date().getFullYear()} {data.profile.name}. {data.profile.role}.
-          </p>
-          
-          <div className="flex flex-wrap justify-center gap-6" aria-label="Enlaces sociales">
-            <a
-              href={`https://instagram.com/${data.profile.instagram.replace('@', '')}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-sm font-bold text-[var(--muted)] hover:text-[var(--primary)] transition-colors flex items-center gap-1"
-            >
-              Instagram <ExternalLink className="w-3.5 h-3.5" />
-            </a>
-            {data.profile.tiktok && (
+      <footer className="border-t border-slate-900 bg-slate-950 py-8 text-slate-400">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-6 pb-6 border-b border-slate-900/60">
+            {/* Left Brand info */}
+            <div className="text-center md:text-left">
+              <span className="font-display font-bold text-white text-base tracking-tight">
+                Gabriel Rios
+              </span>
+              <span className="text-slate-600 mx-2 text-sm">|</span>
+              <span className="text-xs sm:text-sm font-semibold tracking-wide text-slate-400">
+                Visual Creator
+              </span>
+            </div>
+
+            {/* Right Social Links */}
+            <div className="flex flex-wrap items-center justify-center gap-6" aria-label="Enlaces sociales">
               <a
-                href={`https://tiktok.com/${data.profile.tiktok}`}
+                href={`https://instagram.com/${data.profile.instagram.replace('@', '')}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-sm font-bold text-[var(--muted)] hover:text-[var(--primary)] transition-colors flex items-center gap-1"
+                className="text-xs sm:text-sm font-bold text-slate-400 hover:text-white transition-colors flex items-center gap-1.5"
               >
-                TikTok <ExternalLink className="w-3.5 h-3.5" />
+                Instagram <ExternalLink className="w-3.5 h-3.5 opacity-60" />
               </a>
-            )}
-            <a
-              href={`https://linkedin.com/in/${data.profile.linkedin.trim().replace(/\s+/g, '-')}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-sm font-bold text-[var(--muted)] hover:text-[var(--primary)] transition-colors flex items-center gap-1"
-            >
-              LinkedIn <ExternalLink className="w-3.5 h-3.5" />
-            </a>
+              {data.profile.tiktok && (
+                <a
+                  href={`https://tiktok.com/${data.profile.tiktok}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-xs sm:text-sm font-bold text-slate-400 hover:text-white transition-colors flex items-center gap-1.5"
+                >
+                  TikTok <ExternalLink className="w-3.5 h-3.5 opacity-60" />
+                </a>
+              )}
+              <a
+                href={`https://linkedin.com/in/${data.profile.linkedin.trim().replace(/\s+/g, '-')}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-xs sm:text-sm font-bold text-slate-400 hover:text-white transition-colors flex items-center gap-1.5"
+              >
+                LinkedIn <ExternalLink className="w-3.5 h-3.5 opacity-60" />
+              </a>
+            </div>
+          </div>
+
+          {/* Legal and Copyright row */}
+          <div className="flex flex-col lg:flex-row items-center justify-between gap-4 pt-6 text-[11px] sm:text-xs text-slate-500 font-semibold">
+            <p className="text-center lg:text-left">
+              © {new Date().getFullYear()} Gabriel Rios. Visual Creator.
+            </p>
+
+            <div className="flex flex-wrap justify-center gap-x-8 gap-y-2.5 text-center">
+              <button
+                onClick={() => { setActiveLegalDoc('privacidad'); setIsLegalOpen(true); }}
+                className="hover:text-blue-400 transition-colors cursor-pointer"
+              >
+                Política de Privacidad
+              </button>
+              <button
+                onClick={() => { setActiveLegalDoc('terminos'); setIsLegalOpen(true); }}
+                className="hover:text-blue-400 transition-colors cursor-pointer"
+              >
+                Términos y Condiciones
+              </button>
+              <button
+                onClick={() => { setActiveLegalDoc('cookies'); setIsLegalOpen(true); }}
+                className="hover:text-blue-400 transition-colors cursor-pointer"
+              >
+                Política de Cookies
+              </button>
+              <button
+                onClick={() => { setActiveLegalDoc('reembolsos'); setIsLegalOpen(true); }}
+                className="hover:text-blue-400 transition-colors cursor-pointer"
+              >
+                Política de Reembolsos y Cancelaciones
+              </button>
+              <button
+                onClick={() => { setActiveLegalDoc('legal'); setIsLegalOpen(true); }}
+                className="hover:text-blue-400 transition-colors cursor-pointer"
+              >
+                Aviso Legal
+              </button>
+            </div>
           </div>
         </div>
       </footer>
@@ -381,6 +434,14 @@ export default function App() {
           />
         </>
       )}
+
+      {/* Documentos Legales Modal */}
+      <LegalDocsModal
+        isOpen={isLegalOpen}
+        onClose={() => setIsLegalOpen(false)}
+        activeDoc={activeLegalDoc}
+        setActiveDoc={setActiveLegalDoc}
+      />
 
     </div>
   );
