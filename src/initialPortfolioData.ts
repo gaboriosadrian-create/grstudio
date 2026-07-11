@@ -272,7 +272,7 @@ export const defaultPortfolioData: PortfolioData = {
   "plans": [
     {
       "id": "pl1",
-      "title": "Arranque",
+      "title": "Starter",
       "price": "$ 220.000",
       "period": "/ mes",
       "description": "Ideal si quieres ordenar tu contenido y empezar a publicar con más intención.",
@@ -283,12 +283,12 @@ export const defaultPortfolioData: PortfolioData = {
         "Optimización de bio y perfil"
       ],
       "featured": false,
-      "buttonText": "Elegir Arranque",
+      "buttonText": "Elegir Starter",
       "bonusWarranty": "✅ Kit de hashtags personalizados para tu negocio.\n✅ Banco de 20 ideas de contenido para publicar durante el mes.\n✅ Guía rápida de buenas prácticas para Instagram (PDF).\n✅ 30 minutos de asesoría estratégica al comenzar el proyecto."
     },
     {
       "id": "pl2",
-      "title": "Crecimiento",
+      "title": "Accelerate",
       "price": "$ 400.000",
       "period": "/ mes",
       "description": "Para marcas que quieren presencia constante en Reels, historias y publicaciones.",
@@ -299,7 +299,7 @@ export const defaultPortfolioData: PortfolioData = {
         "Calendario + sugerencias de historias"
       ],
       "featured": true,
-      "buttonText": "Elegir Crecimiento",
+      "buttonText": "Elegir Accelerate",
       "bonusWarranty": "✅ Auditoría inicial de redes sociales con recomendaciones de mejora.\n✅ Banco de 50 ideas de contenido adaptadas a la marca.\n✅ Plantillas editables para historias (Canva) listas para reutilizar.\n✅ Análisis mensual de métricas con recomendaciones para el siguiente mes.\n✅ Guía de tendencias y audios en tendencia para potenciar los Reels."
     },
     {
