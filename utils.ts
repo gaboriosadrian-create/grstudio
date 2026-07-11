@@ -1,3 +1,5 @@
+import React from 'react';
+
 /**
  * centralizes format and validation of media URLs (images and videos).
  * Supports both absolute URLs (starts with http/https) and local paths.
@@ -34,3 +36,44 @@ export function formatMediaUrl(url: string | undefined): string {
   
   return `/${trimmed}`;
 }
+
+/**
+ * Wraps English words in a <span className="notranslate" translate="no"> tag
+ * to prevent translation when browsers auto-translate the page.
+ */
+export function preventTranslation(text: string | undefined): React.ReactNode {
+  if (!text) return '';
+
+  // List of common English terms/words to prevent from translation.
+  const englishTerms = [
+    'reels', 'reel', 'copywriting', 'storytelling', 'copy', 'branding', 'tiktok', 'linkedin',
+    'whatsapp', 'instagram', 'insta', 'tally', 'bonus', 'logo', 'logos', 'youtube', 'facebook',
+    'grid', 'feedback', 'post', 'posts', 'feed', 'creator', 'creators', 'online', 'app', 'apps',
+    'portfolio', 'cta', 'landing', 'lead', 'leads', 'marketing', 'briefing', 'funnel', 'funnels',
+    'hook', 'hooks', 'engagement', 'target', 'pitch', 'launch', 'brief', 'briefs', 'b-roll', 'shorts',
+    'stories', 'highlights', 'bio', 'link', 'links', 'script', 'scripts', 'editor', 'editors',
+    'canva', 'notion', 'capcut', 'premiere', 'after effects', 'ai', 'ui', 'ux', 'dev', 'free',
+    'premium', 'chat', 'chats', 'email', 'emails'
+  ];
+
+  // Build a regex matching any of these words as independent words
+  const pattern = new RegExp(`\\b(${englishTerms.join('|')})\\b`, 'gi');
+
+  const parts = text.split(pattern);
+  if (parts.length <= 1) {
+    return text;
+  }
+
+  return parts.map((part, index) => {
+    // If the index is odd, it matched one of our English terms
+    if (index % 2 === 1) {
+      return React.createElement(
+        'span',
+        { key: index, className: 'notranslate', translate: 'no' },
+        part
+      );
+    }
+    return part;
+  });
+}
+

@@ -2,7 +2,7 @@ import React from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { X, Gift, Sparkles, Shield, ArrowRight, CheckCircle2 } from 'lucide-react';
 import { PricePlan } from '../types';
-import { formatMediaUrl } from '../utils';
+import { formatMediaUrl, preventTranslation } from '../utils';
 
 interface BonusModalProps {
   isOpen: boolean;
@@ -12,6 +12,34 @@ interface BonusModalProps {
 }
 
 export default function BonusModal({ isOpen, onClose, plan, onSelectPlan }: BonusModalProps) {
+  const onCloseRef = React.useRef(onClose);
+  React.useEffect(() => {
+    onCloseRef.current = onClose;
+  }, [onClose]);
+
+  React.useEffect(() => {
+    if (!isOpen) return;
+
+    // Push state so back button closes the modal
+    const stateName = 'bonusModalOpen';
+    window.history.pushState({ modal: stateName }, '');
+
+    const handlePopState = (event: PopStateEvent) => {
+      // If user goes back, close the modal
+      onCloseRef.current();
+    };
+
+    window.addEventListener('popstate', handlePopState);
+
+    return () => {
+      window.removeEventListener('popstate', handlePopState);
+      // If the modal was closed manually (not via popstate), we should clean up the history state we pushed
+      if (window.history.state?.modal === stateName) {
+        window.history.back();
+      }
+    };
+  }, [isOpen]);
+
   if (!plan) return null;
 
   // Split description lines
@@ -137,7 +165,7 @@ export default function BonusModal({ isOpen, onClose, plan, onSelectPlan }: Bonu
               {/* Content Header */}
               <div className="p-6 md:p-8 pb-4 border-b border-[var(--line)]">
                 <span className="text-xs font-black tracking-widest text-[var(--primary)] uppercase">
-                  PLAN {plan.title}
+                  PLAN {preventTranslation(plan.title)}
                 </span>
                 <h3 className="font-display font-bold text-2xl sm:text-3xl text-[var(--text)] tracking-tight mt-1">
                   Bonus Exclusivos & Garantía
@@ -173,7 +201,7 @@ export default function BonusModal({ isOpen, onClose, plan, onSelectPlan }: Bonu
                           </div>
                         )}
                         <span className="text-sm font-semibold text-[var(--text)] leading-relaxed whitespace-pre-wrap">
-                          {item.text}
+                          {preventTranslation(item.text)}
                         </span>
                       </motion.div>
                     ))}

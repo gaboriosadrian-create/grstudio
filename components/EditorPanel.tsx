@@ -931,6 +931,28 @@ export default function EditorPanel({ data, onPreview, onSave, onReset, onClose 
                 />
               </div>
 
+              <div className="flex flex-col gap-1.5">
+                <label className="text-xs font-bold text-[var(--text)]">LinkedIn (Usuario de la URL)</label>
+                <input
+                  type="text"
+                  value={editedData.profile.linkedin || ''}
+                  onChange={(e) => handleProfileChange('linkedin', e.target.value)}
+                  placeholder="nombre-apellido"
+                  className="px-3.5 py-2 border border-[var(--line)] rounded-xl text-sm bg-[var(--surface-2)] text-[var(--text)] outline-none focus:border-[var(--primary)]"
+                />
+              </div>
+
+              <div className="flex flex-col gap-1.5 col-span-2">
+                <label className="text-xs font-bold text-[var(--text)]">URL del Formulario Tally (Botón "Solicitar propuesta")</label>
+                <input
+                  type="url"
+                  value={editedData.profile.tallyFormUrl || ''}
+                  onChange={(e) => handleProfileChange('tallyFormUrl', e.target.value)}
+                  placeholder="https://tally.so/r/q4MD7g"
+                  className="px-3.5 py-2 border border-[var(--line)] rounded-xl text-sm bg-[var(--surface-2)] text-[var(--text)] outline-none focus:border-[var(--primary)]"
+                />
+              </div>
+
               <div className="flex flex-col gap-1.5 col-span-2">
                 <label className="text-xs font-bold text-[var(--text)]">Mensaje WhatsApp Predeterminado</label>
                 <textarea

@@ -61,6 +61,7 @@ export interface ProfileInfo {
   instagram: string;
   tiktok: string;
   linkedin: string;
+  tallyFormUrl?: string;
 }
 
 export interface HeroInfo {

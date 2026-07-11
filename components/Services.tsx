@@ -1,6 +1,7 @@
 import React from 'react';
 import { Compass, Video, Camera, PenTool, Calendar, Sparkles } from 'lucide-react';
 import { Service } from '../types';
+import { preventTranslation } from '../utils';
 
 interface ServicesProps {
   services: Service[];
@@ -68,10 +69,10 @@ export default function Services({ services }: ServicesProps) {
 
               {/* Text info */}
               <h3 className="relative z-10 font-display font-bold text-xl text-[var(--text)] tracking-tight">
-                {service.title}
+                {preventTranslation(service.title)}
               </h3>
               <p className="relative z-10 text-[var(--muted)] text-sm sm:text-base leading-relaxed mt-3 mb-6">
-                {service.description}
+                {preventTranslation(service.description)}
               </p>
 
               {/* Link CTA */}
@@ -79,7 +80,7 @@ export default function Services({ services }: ServicesProps) {
                 href="#contacto"
                 className="relative z-10 inline-flex items-center gap-1.5 font-bold text-sm text-[var(--primary)] group-hover:translate-x-1 transition-all"
               >
-                {service.ctaText} <span aria-hidden="true" className="inline-block transition-transform group-hover:translate-x-0.5">→</span>
+                {preventTranslation(service.ctaText)} <span aria-hidden="true" className="inline-block transition-transform group-hover:translate-x-0.5">→</span>
               </a>
             </article>
           ))}

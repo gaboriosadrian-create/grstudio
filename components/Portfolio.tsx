@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Play, Camera, Sparkles, PenTool, Grid, Eye, X, MessageCircle, ExternalLink } from 'lucide-react';
 import { Project } from '../types';
 import ProjectCarousel from './ProjectCarousel';
-import { formatMediaUrl } from '../utils';
+import { formatMediaUrl, preventTranslation } from '../utils';
 
 interface PortfolioProps {
   projects: Project[];
@@ -150,7 +150,7 @@ export default function Portfolio({ projects }: PortfolioProps) {
 
                 {/* Badge top-left */}
                 <span className="relative z-10 self-start px-3.5 py-1.5 rounded-full border border-white/20 bg-black/40 backdrop-blur-md text-xs font-extrabold text-white shadow-sm">
-                  {project.badge}
+                  {preventTranslation(project.badge)}
                 </span>
 
                 {/* Media Icon center-bottom */}
@@ -169,10 +169,10 @@ export default function Portfolio({ projects }: PortfolioProps) {
               {/* Card Body content */}
               <div className="p-6 flex flex-col flex-grow">
                 <h3 className="font-display font-bold text-lg sm:text-xl text-[var(--text)] tracking-tight leading-tight group-hover:text-[var(--primary)] transition-colors">
-                  {project.title}
+                  {preventTranslation(project.title)}
                 </h3>
                 <p className="text-[var(--muted)] text-sm sm:text-base leading-relaxed mt-2.5 flex-grow">
-                  {project.description}
+                  {preventTranslation(project.description)}
                 </p>
 
                 {/* Tags bottom list */}
@@ -182,7 +182,7 @@ export default function Portfolio({ projects }: PortfolioProps) {
                       key={tagIdx}
                       className="px-3 py-1 border border-[var(--line)] rounded-full bg-[var(--surface-2)] text-[var(--muted)] text-xs font-extrabold"
                     >
-                      {tag}
+                      {preventTranslation(tag)}
                     </span>
                   ))}
                 </div>
@@ -259,7 +259,7 @@ export default function Portfolio({ projects }: PortfolioProps) {
                     {renderMediaIcon(selectedProject.iconType)}
                   </div>
                   <span className="px-3.5 py-1.5 rounded-full border border-white/20 bg-white/10 text-xs font-black uppercase tracking-widest text-white">
-                    {selectedProject.badge}
+                    {preventTranslation(selectedProject.badge)}
                   </span>
                   <p className="mt-4 text-white/80 max-w-md text-sm sm:text-base">
                     Esta pieza se elabora a medida según tu marca (estilo, colores y textos adaptados).
@@ -273,21 +273,21 @@ export default function Portfolio({ projects }: PortfolioProps) {
               <div className="flex-grow">
                 <div className="flex flex-wrap items-center gap-2 mb-4">
                   <span className="px-3 py-1 rounded-full bg-[var(--primary)]/10 text-[var(--primary)] text-xs font-black uppercase tracking-wider">
-                    {selectedProject.badge}
+                    {preventTranslation(selectedProject.badge)}
                   </span>
                   {selectedProject.categories.map((cat) => (
                     <span key={cat} className="px-2.5 py-1 rounded-full bg-[var(--surface-2)] border border-[var(--line)] text-[var(--muted)] text-xs capitalize font-bold">
-                      {cat}
+                      {preventTranslation(cat)}
                     </span>
                   ))}
                 </div>
 
                 <h3 className="font-display font-bold text-xl sm:text-2xl md:text-3xl text-[var(--text)] tracking-tight leading-snug">
-                  {selectedProject.title}
+                  {preventTranslation(selectedProject.title)}
                 </h3>
                 
                 <p className="text-[var(--muted)] text-sm sm:text-base leading-relaxed mt-4 whitespace-pre-line">
-                  {selectedProject.description}
+                  {preventTranslation(selectedProject.description)}
                 </p>
 
 
