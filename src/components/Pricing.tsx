@@ -1,32 +1,57 @@
 import React, { useState } from 'react';
-import { Check, Sparkles, ChevronDown } from 'lucide-react';
+import { Check, Sparkles, Gift } from 'lucide-react';
 import { PricePlan } from '../types';
+import BonusModal from './BonusModal';
 
 interface PricingProps {
   plans: PricePlan[];
+  onSelectPlan: (planTitle: string) => void;
 }
 
 function PricingCard({ 
   plan, 
-  isExpanded, 
-  onToggle 
+  onOpenBonus,
+  onSelectPlan
 }: { 
   plan: PricePlan; 
-  isExpanded: boolean; 
-  onToggle: () => void; 
-  key?: React.Key;
+  onOpenBonus: () => void; 
+  onSelectPlan: (planTitle: string) => void;
+  key?: string | number;
 }) {
+  const handleSelect = () => {
+    onSelectPlan(plan.title);
+    const contactSection = document.getElementById('contacto');
+    if (contactSection) {
+      contactSection.scrollIntoView({ behavior: 'smooth' });
+    }
+    // Focus the "Nombre" input immediately and after scroll completes
+    const nameInput = document.getElementById('name');
+    if (nameInput) {
+      nameInput.focus();
+    }
+    setTimeout(() => {
+      document.getElementById('name')?.focus();
+    }, 450);
+  };
+
   return (
     <article
-      className={`relative flex flex-col p-8 border rounded-[32px] bg-[var(--surface)] shadow-sm hover:shadow-xl transition-all duration-300 ${
+      className={`relative flex flex-col p-8 border rounded-[32px] bg-[var(--surface)] shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden ${
         plan.featured
           ? 'border-[rgba(255,107,53,0.48)] shadow-[0_30px_80px_rgba(255,107,53,0.2)] lg:-translate-y-3 z-10'
           : 'border-[var(--line)]'
-      }`}
+      } ${plan.hasDiscount ? 'pt-14' : ''}`}
     >
+      {/* Franja de descuento */}
+      {plan.hasDiscount && (
+        <div className="absolute top-0 inset-x-0 bg-gradient-to-r from-red-600 to-rose-500 text-white text-center py-2 text-[10px] sm:text-[11px] font-black tracking-widest uppercase shadow-sm flex items-center justify-center gap-1.5 z-20">
+          <span>🏷️</span> {plan.discountLabel || 'DESCUENTO ESPECIAL'}
+        </div>
+      )}
+
       {/* Featured Badge */}
       {plan.featured && (
-        <span className="absolute top-5 right-5 px-3 py-1 rounded-full text-[10px] font-black text-white bg-gradient-to-r from-[var(--primary)] to-[var(--secondary)] flex items-center gap-1 shadow-sm">
+        <span className={`absolute ${plan.hasDiscount ? 'top-15' : 'top-5'} right-5 px-3 py-1 rounded-full text-[10px] font-black text-white bg-gradient-to-r from-[var(--primary)] to-[var(--secondary)] flex items-center gap-1 shadow-sm z-10 transition-all`}>
           <Sparkles className="w-3 h-3" /> MÁS ELEGIDO
         </span>
       )}
@@ -37,13 +62,32 @@ function PricingCard({
       </h3>
 
       {/* Price */}
-      <div className="flex items-baseline mt-5 mb-2">
-        <span className="text-4xl sm:text-5xl font-extrabold font-display tracking-tight text-[var(--text)]">
-          {plan.price}
-        </span>
-        <span className="text-[var(--muted)] text-sm font-bold ml-2">
-          {plan.period}
-        </span>
+      <div className="flex flex-col mt-5 mb-2">
+        {plan.hasDiscount ? (
+          <div className="space-y-1">
+            <div className="flex items-center gap-1.5 text-xs text-[var(--muted)] font-semibold">
+              <span className="text-slate-400 dark:text-slate-500 font-medium">Antes:</span>
+              <span className="line-through font-bold text-red-500/80 dark:text-red-400/80">{plan.price}</span>
+            </div>
+            <div className="flex items-baseline">
+              <span className="text-4xl sm:text-5xl font-extrabold font-display tracking-tight text-[var(--text)]">
+                {plan.discountedPrice || plan.price}
+              </span>
+              <span className="text-[var(--muted)] text-sm font-bold ml-2">
+                {plan.period}
+              </span>
+            </div>
+          </div>
+        ) : (
+          <div className="flex items-baseline">
+            <span className="text-4xl sm:text-5xl font-extrabold font-display tracking-tight text-[var(--text)]">
+              {plan.price}
+            </span>
+            <span className="text-[var(--muted)] text-sm font-bold ml-2">
+              {plan.period}
+            </span>
+          </div>
+        )}
       </div>
 
       {/* Description */}
@@ -64,29 +108,24 @@ function PricingCard({
         ))}
       </ul>
 
-      {/* Collapsible "+ Bonus & garantía" Section */}
+      {/* Collapsible "+ Bonus & garantía" Section -> Modal trigger */}
       {plan.bonusWarranty && plan.bonusWarranty.trim() !== '' && (
         <div className="mb-6 w-full text-left">
           <button
             type="button"
-            onClick={onToggle}
-            className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-extrabold text-xs sm:text-sm flex items-center gap-1 cursor-pointer transition-colors focus:outline-none"
+            onClick={onOpenBonus}
+            className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-extrabold text-xs sm:text-sm flex items-center gap-1.5 cursor-pointer transition-colors focus:outline-none group"
           >
-            <span>{isExpanded ? '- Ocultar' : '+'} Bonus & garantía</span>
-            <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`} />
+            <span className="flex items-center gap-1.5 hover:underline">
+              <span>🎁</span> + Bonus & garantía
+            </span>
           </button>
-          
-          {isExpanded && (
-            <div className="mt-2.5 p-3.5 rounded-xl bg-blue-50/60 dark:bg-blue-950/20 border-l-2 border-blue-500 text-xs text-[var(--muted)] leading-relaxed whitespace-pre-line animate-fade-in font-medium animate-[fadeIn_0.2s_ease-out]">
-              {plan.bonusWarranty}
-            </div>
-          )}
         </div>
       )}
 
       {/* Plan CTA button */}
-      <a
-        href="#contacto"
+      <button
+        onClick={handleSelect}
         className={`w-full inline-flex items-center justify-center h-12 rounded-full font-extrabold text-sm transition-all duration-200 cursor-pointer ${
           plan.featured
             ? 'text-white bg-gradient-to-br from-[var(--primary)] to-[var(--secondary)] shadow-md shadow-[rgba(255,107,53,0.2)] hover:-translate-y-0.5 hover:shadow-lg'
@@ -94,13 +133,13 @@ function PricingCard({
         }`}
       >
         {plan.buttonText || `Elegir ${plan.title}`}
-      </a>
+      </button>
     </article>
   );
 }
 
-export default function Pricing({ plans }: PricingProps) {
-  const [isExpanded, setIsExpanded] = useState(false);
+export default function Pricing({ plans, onSelectPlan }: PricingProps) {
+  const [selectedPlanForBonus, setSelectedPlanForBonus] = useState<PricePlan | null>(null);
 
   return (
     <section className="py-20 bg-gradient-to-b from-transparent via-[var(--surface-2)] to-transparent" id="planes">
@@ -125,11 +164,19 @@ export default function Pricing({ plans }: PricingProps) {
             <PricingCard 
               key={plan.id} 
               plan={plan} 
-              isExpanded={isExpanded} 
-              onToggle={() => setIsExpanded(!isExpanded)} 
+              onOpenBonus={() => setSelectedPlanForBonus(plan)} 
+              onSelectPlan={onSelectPlan}
             />
           ))}
         </div>
+
+        {/* Bonus Modal */}
+        <BonusModal
+          isOpen={selectedPlanForBonus !== null}
+          onClose={() => setSelectedPlanForBonus(null)}
+          plan={selectedPlanForBonus}
+          onSelectPlan={onSelectPlan}
+        />
 
         {/* Garantía de satisfacción */}
         <div className="mb-16 p-8 sm:p-10 rounded-[36px] border border-blue-100 dark:border-blue-900/50 bg-gradient-to-br from-blue-50/40 via-indigo-50/20 to-sky-50/30 dark:from-blue-950/20 dark:via-slate-950/10 dark:to-sky-950/10 text-center shadow-sm relative overflow-hidden">

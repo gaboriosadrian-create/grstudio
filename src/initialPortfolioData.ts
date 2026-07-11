@@ -272,8 +272,8 @@ export const defaultPortfolioData: PortfolioData = {
   "plans": [
     {
       "id": "pl1",
-      "title": "Starter",
-      "price": "$ 220.000",
+      "title": "Startup",
+      "price": "u$d 200",
       "period": "/ mes",
       "description": "Ideal si quieres ordenar tu contenido y empezar a publicar con más intención.",
       "features": [
@@ -283,13 +283,17 @@ export const defaultPortfolioData: PortfolioData = {
         "Optimización de bio y perfil"
       ],
       "featured": false,
-      "buttonText": "Elegir Starter",
-      "bonusWarranty": "✅ Kit de hashtags personalizados para tu negocio.\n✅ Banco de 20 ideas de contenido para publicar durante el mes.\n✅ Guía rápida de buenas prácticas para Instagram (PDF).\n✅ 30 minutos de asesoría estratégica al comenzar el proyecto."
+      "buttonText": "Elegir Arranque",
+      "bonusWarranty": "✅ Kit de bienvenida digital.\n✅ Banco de 20 ideas de contenido para publicar durante el mes.\n✅ Guía rápida de buenas prácticas para Instagram (PDF).\n✅ 30 minutos de asesoría estratégica al comenzar el proyecto.",
+      "hasDiscount": true,
+      "discountedPrice": "u$d 147",
+      "discountLabel": "% OFF EXTRA! (cupos limitados)",
+      "bonusImage": "/uploads/15611565792469418665.jpg"
     },
     {
       "id": "pl2",
       "title": "Accelerate",
-      "price": "$ 400.000",
+      "price": "u$d 400",
       "period": "/ mes",
       "description": "Para marcas que quieren presencia constante en Reels, historias y publicaciones.",
       "features": [
@@ -299,13 +303,17 @@ export const defaultPortfolioData: PortfolioData = {
         "Calendario + sugerencias de historias"
       ],
       "featured": true,
-      "buttonText": "Elegir Accelerate",
-      "bonusWarranty": "✅ Auditoría inicial de redes sociales con recomendaciones de mejora.\n✅ Banco de 50 ideas de contenido adaptadas a la marca.\n✅ Plantillas editables para historias (Canva) listas para reutilizar.\n✅ Análisis mensual de métricas con recomendaciones para el siguiente mes.\n✅ Guía de tendencias y audios en tendencia para potenciar los Reels."
+      "buttonText": "Elegir Crecimiento",
+      "bonusWarranty": "✅ Kit de bienvenida digital.\n✅ Auditoría inicial de redes sociales con recomendaciones de mejora.\n✅ Banco de 20 ideas de contenido adaptadas a la marca.\n✅ Plantillas editables para historias (Canva) listas para reutilizar.\n✅ Análisis mensual de métricas con recomendaciones para el siguiente mes.\n✅ Guía de tendencias y audios en tendencia para potenciar los Reels.",
+      "hasDiscount": true,
+      "discountLabel": "% OFF EXTRA! (cupos limitados)",
+      "discountedPrice": "U$D 347",
+      "bonusImage": "/uploads/15611565792469418665.jpg"
     },
     {
       "id": "pl3",
       "title": "Premium",
-      "price": "$ 650.000",
+      "price": "u$d 650",
       "period": "/ mes",
       "description": "Soporte completo para construir autoridad, confianza y un sistema de contenido mensual.",
       "features": [
@@ -316,7 +324,11 @@ export const defaultPortfolioData: PortfolioData = {
       ],
       "featured": false,
       "buttonText": "Elegir Premium",
-      "bonusWarranty": "✅ Manual de identidad para redes (tono de comunicación, estilo visual y lineamientos de contenido).\n✅ Banco de 100 ideas de contenido personalizadas para publicar durante los próximos meses.\n✅ Calendario estratégico con fechas comerciales y oportunidades relevantes para la marca.\n✅ Prioridad en la atención y respuesta por WhatsApp.\n✅ Acceso anticipado a nuevas plantillas, formatos y tendencias que implemente en mis servicios.\n✅ 1 pieza de contenido extra de regalo por mes para aprovechar una tendencia, promoción o lanzamiento."
+      "bonusWarranty": "✅ Kit de bienvenida digital.\n✅ Manual de identidad para redes (tono de comunicación, estilo visual y lineamientos de contenido).\n✅ Banco de 20 ideas de contenido personalizadas para publicar durante los próximos meses.\n✅ Calendario estratégico con fechas comerciales y oportunidades relevantes para la marca.\n✅ Prioridad en la atención y respuesta por WhatsApp.\n✅ Acceso anticipado a nuevas plantillas, formatos y tendencias que implemente en mis servicios.\n✅ 1 pieza de contenido extra de regalo por mes para aprovechar una tendencia, promoción o lanzamiento.",
+      "hasDiscount": true,
+      "discountLabel": "% OFF EXTRA! esta semana",
+      "discountedPrice": "U$D 587",
+      "bonusImage": "/uploads/15611565792469418665.jpg"
     }
   ]
 };

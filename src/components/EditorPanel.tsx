@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { X, Save, RotateCcw, Copy, Check, Users, Sparkles, Sliders, DollarSign, Award, Briefcase, Grid, Trash2, Plus, Upload, Loader2, Download } from 'lucide-react';
-import { PortfolioData, Project } from '../types';
+import { PortfolioData, Project, PricePlan } from '../types';
 import { formatMediaUrl } from '../utils';
 
 // Utility helper to convert GitHub web blob URLs to raw direct image URLs
@@ -45,6 +45,12 @@ const cleanPortfolioData = (data: PortfolioData): PortfolioData => {
       return proj;
     });
   }
+  if (Array.isArray(copy.plans)) {
+    copy.plans = copy.plans.map((plan: any) => {
+      if (plan.bonusImage) plan.bonusImage = cleanImageUrl(plan.bonusImage);
+      return plan;
+    });
+  }
   return copy;
 };
 
@@ -67,6 +73,7 @@ export default function EditorPanel({ data, onPreview, onSave, onReset, onClose 
   const [uploadingLogo, setUploadingLogo] = useState(false);
   const [uploadingProfile, setUploadingProfile] = useState(false);
   const [uploadingProjImg, setUploadingProjImg] = useState<{ idx: number; imgIdx: number } | null>(null);
+  const [uploadingPlanBonusImg, setUploadingPlanBonusImg] = useState<number | null>(null);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [editorWidth, setEditorWidth] = useState<'normal' | 'wide' | 'full'>(() => {
     try {
@@ -321,6 +328,49 @@ export default function EditorPanel({ data, onPreview, onSave, onReset, onClose 
     }
   };
 
+  const handlePlanBonusImageUpload = async (planIdx: number, file: File) => {
+    setUploadingPlanBonusImg(planIdx);
+    setUploadError(null);
+    try {
+      const plan = editedData.plans[planIdx];
+      const formData = new FormData();
+      formData.append('planId', plan ? (plan.id || `index_${planIdx}`) : `index_${planIdx}`);
+      formData.append('fileType', 'image');
+      formData.append('file', file);
+
+      const response = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error('Error al subir la imagen al servidor.');
+      }
+
+      const contentType = response.headers.get('content-type');
+      if (!contentType || !contentType.includes('application/json')) {
+        throw new Error('La respuesta del servidor no es JSON.');
+      }
+
+      const result = await response.json();
+      if (result.url) {
+        handlePlanChange(planIdx, 'bonusImage', result.url);
+      } else {
+        throw new Error('No se recibió la URL de la imagen.');
+      }
+    } catch (err: any) {
+      console.warn('El servidor no está disponible para subir la imagen del bonus. Usando almacenamiento Base64 local:', err);
+      try {
+        const base64Url = await convertToBase64(file);
+        handlePlanChange(planIdx, 'bonusImage', base64Url);
+      } catch (base64Err: any) {
+        setUploadError(`Error al procesar imagen: ${base64Err.message}`);
+      }
+    } finally {
+      setUploadingPlanBonusImg(null);
+    }
+  };
+
   const handleProjectImageChange = (projIdx: number, imgIdx: number, value: string) => {
     const cleanedValue = cleanImageUrl(value);
     const newProjects = [...editedData.projects];
@@ -454,7 +504,7 @@ export default function EditorPanel({ data, onPreview, onSave, onReset, onClose 
     }));
   };
 
-  const handlePlanChange = (index: number, key: 'title' | 'price' | 'description' | 'bonusWarranty', value: string) => {
+  const handlePlanChange = (index: number, key: keyof PricePlan, value: any) => {
     const newPlans = [...editedData.plans];
     newPlans[index] = { ...newPlans[index], [key]: value };
     setEditedData((prev) => ({
@@ -1321,7 +1371,7 @@ export default function EditorPanel({ data, onPreview, onSave, onReset, onClose 
                     />
                   </div>
                   <div className="flex flex-col gap-1">
-                    <label className="text-[10px] font-bold text-[var(--muted)] uppercase">Precio mensual</label>
+                    <label className="text-[10px] font-bold text-[var(--muted)] uppercase">Precio regular mensual</label>
                     <input
                       type="text"
                       value={plan.price}
@@ -1329,6 +1379,47 @@ export default function EditorPanel({ data, onPreview, onSave, onReset, onClose 
                       className="px-3 py-1.5 border border-[var(--line)] rounded-xl text-sm bg-[var(--surface-2)] text-[var(--text)] outline-none focus:border-[var(--primary)] font-bold text-center"
                     />
                   </div>
+                </div>
+
+                {/* DESCUENTOS CONFIG */}
+                <div className="p-3 bg-red-500/5 dark:bg-red-500/10 border border-red-500/20 rounded-xl space-y-3">
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      id={`discount-toggle-${plan.id}`}
+                      checked={!!plan.hasDiscount}
+                      onChange={(e) => handlePlanChange(planIdx, 'hasDiscount', e.target.checked)}
+                      className="w-4 h-4 rounded border-[var(--line)] text-red-600 focus:ring-red-500 cursor-pointer"
+                    />
+                    <label htmlFor={`discount-toggle-${plan.id}`} className="text-xs font-bold text-red-600 dark:text-red-400 select-none cursor-pointer">
+                      Activar franja de descuento
+                    </label>
+                  </div>
+
+                  {plan.hasDiscount && (
+                    <div className="grid grid-cols-2 gap-3 animate-[fadeIn_0.2s_ease-out]">
+                      <div className="flex flex-col gap-1">
+                        <label className="text-[10px] font-bold text-red-600 dark:text-red-400 uppercase">Texto de la Franja</label>
+                        <input
+                          type="text"
+                          value={plan.discountLabel || ''}
+                          onChange={(e) => handlePlanChange(planIdx, 'discountLabel', e.target.value)}
+                          placeholder="Ej: ¡20% OFF EXTRA!"
+                          className="px-3 py-1.5 border border-red-500/30 rounded-xl text-xs bg-[var(--surface-2)] text-[var(--text)] outline-none focus:border-red-500"
+                        />
+                      </div>
+                      <div className="flex flex-col gap-1">
+                        <label className="text-[10px] font-bold text-red-600 dark:text-red-400 uppercase">Importe con descuento</label>
+                        <input
+                          type="text"
+                          value={plan.discountedPrice || ''}
+                          onChange={(e) => handlePlanChange(planIdx, 'discountedPrice', e.target.value)}
+                          placeholder="Ej: $ 176.000"
+                          className="px-3 py-1.5 border border-red-500/30 rounded-xl text-xs bg-[var(--surface-2)] text-[var(--text)] outline-none focus:border-red-500 font-bold text-center"
+                        />
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 <div className="flex flex-col gap-1.5">
@@ -1352,6 +1443,67 @@ export default function EditorPanel({ data, onPreview, onSave, onReset, onClose 
                     placeholder="Ej: 🎁 BONUS: Auditoría completa de tu perfil...\n🛡️ GARANTÍA: Satisfacción de 15 días..."
                     className="px-3 py-1.5 border border-[var(--line)] rounded-xl text-sm bg-[var(--surface-2)] text-[var(--text)] outline-none focus:border-[var(--primary)] resize-y"
                   />
+                </div>
+
+                <div className="flex flex-col gap-1.5 p-3.5 bg-blue-500/5 dark:bg-blue-500/10 border border-blue-500/15 rounded-2xl">
+                  <label className="text-[10px] font-bold text-blue-600 dark:text-blue-400 uppercase flex items-center gap-1">
+                    🖼️ Imagen del Bonus (Visualización en Modal)
+                  </label>
+                  <div className="flex items-center gap-3">
+                    {plan.bonusImage ? (
+                      <div className="relative w-14 h-14 rounded-xl border border-[var(--line)] overflow-hidden bg-black/5 flex-shrink-0">
+                        <img
+                          src={formatMediaUrl(plan.bonusImage)}
+                          alt="Bonus preview"
+                          className="w-full h-full object-cover"
+                          referrerPolicy="no-referrer"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => handlePlanChange(planIdx, 'bonusImage', '')}
+                          className="absolute inset-0 bg-black/60 opacity-0 hover:opacity-100 transition-opacity flex items-center justify-center text-white text-[10px] font-bold cursor-pointer"
+                        >
+                          Quitar
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="w-14 h-14 rounded-xl border-2 border-dashed border-[var(--line)] flex items-center justify-center text-[var(--muted)] text-lg bg-[var(--surface-2)] flex-shrink-0">
+                        🎁
+                      </div>
+                    )}
+                    <div className="flex-1 space-y-1.5">
+                      <input
+                        type="text"
+                        value={plan.bonusImage || ''}
+                        onChange={(e) => handlePlanChange(planIdx, 'bonusImage', e.target.value)}
+                        placeholder="Pegar URL de imagen o subir archivo"
+                        className="w-full px-3 py-1.5 border border-[var(--line)] rounded-xl text-xs bg-[var(--surface-2)] text-[var(--text)] outline-none focus:border-[var(--primary)]"
+                      />
+                      <label className="inline-flex items-center justify-center gap-1.5 px-3 py-1 bg-[var(--surface)] hover:bg-[var(--surface-2)] border border-[var(--line)] text-[10px] font-black text-[var(--text)] rounded-lg cursor-pointer transition-colors shadow-sm">
+                        {uploadingPlanBonusImg === planIdx ? (
+                          <>
+                            <Loader2 className="w-3 h-3 animate-spin text-[var(--primary)]" />
+                            Subiendo...
+                          </>
+                        ) : (
+                          <>
+                            <Upload className="w-3 h-3 text-[var(--muted)]" />
+                            Subir archivo
+                          </>
+                        )}
+                        <input
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          disabled={uploadingPlanBonusImg !== null}
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) handlePlanBonusImageUpload(planIdx, file);
+                          }}
+                        />
+                      </label>
+                    </div>
+                  </div>
                 </div>
 
                 <div className="space-y-2">

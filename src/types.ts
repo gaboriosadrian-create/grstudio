@@ -43,6 +43,10 @@ export interface PricePlan {
   featured: boolean;
   buttonText: string;
   bonusWarranty?: string;
+  bonusImage?: string;
+  hasDiscount?: boolean;
+  discountLabel?: string;
+  discountedPrice?: string;
 }
 
 export interface ProfileInfo {

@@ -1,19 +1,27 @@
-import React, { useState, FormEvent } from 'react';
+import React, { useState, useEffect, FormEvent } from 'react';
 import { Mail, MessageSquare, Instagram, ExternalLink, Copy, Check } from 'lucide-react';
 import { ProfileInfo } from '../types';
 
 interface ContactProps {
   profile: ProfileInfo;
+  prefilledMessage?: string;
 }
 
-export default function Contact({ profile }: ContactProps) {
+export default function Contact({ profile, prefilledMessage }: ContactProps) {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
+    whatsapp: '',
     service: '',
     budget: '',
     message: '',
   });
+
+  useEffect(() => {
+    if (prefilledMessage) {
+      setFormData((prev) => ({ ...prev, message: prefilledMessage }));
+    }
+  }, [prefilledMessage]);
 
   const [formStatus, setFormStatus] = useState<{
     type: 'success' | 'error' | null;
@@ -54,12 +62,12 @@ export default function Contact({ profile }: ContactProps) {
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
 
-    const { name, email, service, budget, message } = formData;
+    const { name, email, whatsapp, service, budget, message } = formData;
 
-    if (!name.trim() || !email.trim() || !service.trim() || !message.trim()) {
+    if (!name.trim() || !email.trim() || !whatsapp.trim() || !service.trim() || !message.trim()) {
       setFormStatus({
         type: 'error',
-        message: 'Por favor, completa los campos obligatorios para poder contactarte.',
+        message: 'Por favor, completa todos los campos obligatorios (*).',
       });
       return;
     }
@@ -83,6 +91,7 @@ export default function Contact({ profile }: ContactProps) {
     const body = [
       `Nombre: ${name}`,
       `Email: ${email}`,
+      `WhatsApp: ${whatsapp}`,
       `Servicio: ${service}`,
       `Presupuesto: ${budget || 'No definido'}`,
       '',
@@ -97,6 +106,7 @@ export default function Contact({ profile }: ContactProps) {
     setFormData({
       name: '',
       email: '',
+      whatsapp: '',
       service: '',
       budget: '',
       message: '',
@@ -196,8 +206,8 @@ export default function Contact({ profile }: ContactProps) {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
               
               <div className="flex flex-col gap-2">
-                <label htmlFor="name" className="text-[var(--text)] text-sm font-extrabold">
-                  Nombre
+                <label htmlFor="name" className="text-[var(--text)] text-sm font-extrabold flex items-center gap-1">
+                  Nombre <span className="text-rose-500 font-black">*</span>
                 </label>
                 <input
                   id="name"
@@ -213,8 +223,8 @@ export default function Contact({ profile }: ContactProps) {
               </div>
 
               <div className="flex flex-col gap-2">
-                <label htmlFor="email" className="text-[var(--text)] text-sm font-extrabold">
-                  Email
+                <label htmlFor="email" className="text-[var(--text)] text-sm font-extrabold flex items-center gap-1">
+                  Email <span className="text-rose-500 font-black">*</span>
                 </label>
                 <input
                   id="email"
@@ -229,9 +239,27 @@ export default function Contact({ profile }: ContactProps) {
                 />
               </div>
 
+              {/* WhatsApp Contact input - Required and Mandatory */}
+              <div className="flex flex-col gap-2 sm:col-span-2">
+                <label htmlFor="whatsapp" className="text-[var(--text)] text-sm font-extrabold flex items-center gap-1">
+                  Número de WhatsApp (Contacto) <span className="text-rose-500 font-black">*</span>
+                </label>
+                <input
+                  id="whatsapp"
+                  name="whatsapp"
+                  type="tel"
+                  autoComplete="tel"
+                  value={formData.whatsapp}
+                  onChange={handleInputChange}
+                  placeholder="+54 9 11 1234-5678"
+                  required
+                  className="w-full px-4 py-3 border border-[var(--line)] rounded-2xl bg-[var(--surface-2)] text-[var(--text)] text-sm focus:border-[var(--primary)] focus:ring-4 focus:ring-[var(--primary-soft)] focus:bg-[var(--surface)] outline-none transition-all duration-200"
+                />
+              </div>
+
               <div className="flex flex-col gap-2">
-                <label htmlFor="service" className="text-[var(--text)] text-sm font-extrabold">
-                  Servicio de interés
+                <label htmlFor="service" className="text-[var(--text)] text-sm font-extrabold flex items-center gap-1">
+                  Servicio de interés <span className="text-rose-500 font-black">*</span>
                 </label>
                 <select
                   id="service"
@@ -269,8 +297,8 @@ export default function Contact({ profile }: ContactProps) {
               </div>
 
               <div className="flex flex-col gap-2 sm:col-span-2">
-                <label htmlFor="message" className="text-[var(--text)] text-sm font-extrabold">
-                  Cuéntame qué necesitas
+                <label htmlFor="message" className="text-[var(--text)] text-sm font-extrabold flex items-center gap-1">
+                  Cuéntame qué necesitas <span className="text-rose-500 font-black">*</span>
                 </label>
                 <textarea
                   id="message"

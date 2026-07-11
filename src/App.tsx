@@ -25,6 +25,11 @@ export default function App() {
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [isLegalOpen, setIsLegalOpen] = useState(false);
   const [activeLegalDoc, setActiveLegalDoc] = useState<LegalDocKey>('privacidad');
+  const [prefilledMessage, setPrefilledMessage] = useState<string>('');
+
+  const handleSelectPlan = (planTitle: string) => {
+    setPrefilledMessage(`Hola, me interesa el plan ${planTitle}, y quiero recibir información.`);
+  };
 
   // Initialize theme and portfolio data on load
   useEffect(() => {
@@ -278,10 +283,10 @@ export default function App() {
         <Process steps={data.steps} />
 
         {/* Prices & Subscription Packages */}
-        <Pricing plans={data.plans} />
+        <Pricing plans={data.plans} onSelectPlan={handleSelectPlan} />
 
         {/* Contact Form Section */}
-        <Contact profile={data.profile} />
+        <Contact profile={data.profile} prefilledMessage={prefilledMessage} />
       </main>
 
       {/* Footer copyright and socials */}

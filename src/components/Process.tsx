@@ -1,5 +1,6 @@
 import React from 'react';
 import { ProcessStep } from '../types';
+import { ArrowRight } from 'lucide-react';
 
 interface ProcessProps {
   steps: ProcessStep[];
@@ -37,9 +38,11 @@ export default function Process({ steps }: ProcessProps) {
               key={step.id}
               className="relative p-6 border border-[var(--line)] rounded-[28px] bg-[var(--surface)] shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300"
             >
-              {/* Connection line between steps on desktop */}
+              {/* Connection arrow between steps on desktop */}
               {idx < steps.length - 1 && (
-                <div className="hidden lg:block absolute top-[46px] right-[-14px] w-6 h-[2px] bg-[var(--line)] z-10" />
+                <div className="hidden lg:flex absolute top-1/2 -translate-y-1/2 left-[calc(100%+12px)] -translate-x-1/2 z-20 pointer-events-none items-center justify-center text-blue-500/60 dark:text-blue-400/50">
+                  <ArrowRight className="w-5 h-5" />
+                </div>
               )}
 
               {/* Step Number */}
