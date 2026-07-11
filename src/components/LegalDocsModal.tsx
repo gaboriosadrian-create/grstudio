@@ -11,6 +11,31 @@ interface LegalDocsModalProps {
 }
 
 export default function LegalDocsModal({ isOpen, onClose, activeDoc, setActiveDoc }: LegalDocsModalProps) {
+  const onCloseRef = React.useRef(onClose);
+  React.useEffect(() => {
+    onCloseRef.current = onClose;
+  }, [onClose]);
+
+  React.useEffect(() => {
+    if (!isOpen) return;
+
+    const stateName = 'legalDocsModalOpen';
+    window.history.pushState({ modal: stateName }, '');
+
+    const handlePopState = () => {
+      onCloseRef.current();
+    };
+
+    window.addEventListener('popstate', handlePopState);
+
+    return () => {
+      window.removeEventListener('popstate', handlePopState);
+      if (window.history.state?.modal === stateName) {
+        window.history.back();
+      }
+    };
+  }, [isOpen]);
+
   if (!isOpen) return null;
 
   const docs = [

@@ -30,6 +30,27 @@ export default function App() {
     setPrefilledMessage(`Hola, me interesa el plan ${planTitle}, y quiero recibir información.`);
   };
 
+  // Back button handling for Editor Panel modal/sidebar
+  useEffect(() => {
+    if (!isEditorOpen) return;
+
+    const stateName = 'editorPanelOpen';
+    window.history.pushState({ modal: stateName }, '');
+
+    const handlePopState = () => {
+      setIsEditorOpen(false);
+    };
+
+    window.addEventListener('popstate', handlePopState);
+
+    return () => {
+      window.removeEventListener('popstate', handlePopState);
+      if (window.history.state?.modal === stateName) {
+        window.history.back();
+      }
+    };
+  }, [isEditorOpen]);
+
   // Initialize theme and portfolio data on load
   useEffect(() => {
     // 0. Set page title

@@ -12,6 +12,31 @@ export default function Portfolio({ projects }: PortfolioProps) {
   const [activeFilter, setActiveFilter] = useState('todos');
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
 
+  const selectedProjectRef = React.useRef(selectedProject);
+  React.useEffect(() => {
+    selectedProjectRef.current = selectedProject;
+  }, [selectedProject]);
+
+  React.useEffect(() => {
+    if (!selectedProject) return;
+
+    const stateName = 'portfolioProjectModalOpen';
+    window.history.pushState({ modal: stateName }, '');
+
+    const handlePopState = () => {
+      setSelectedProject(null);
+    };
+
+    window.addEventListener('popstate', handlePopState);
+
+    return () => {
+      window.removeEventListener('popstate', handlePopState);
+      if (window.history.state?.modal === stateName) {
+        window.history.back();
+      }
+    };
+  }, [selectedProject]);
+
   const filters = [
     { value: 'todos', label: 'Todos' },
     { value: 'reels', label: 'Reels' },
