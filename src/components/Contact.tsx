@@ -1,5 +1,5 @@
 import React, { useState, useEffect, FormEvent } from 'react';
-import { Mail, MessageSquare, Instagram, ExternalLink, Copy, Check } from 'lucide-react';
+import { Mail, MessageSquare, Instagram, ExternalLink, Copy, Check, Youtube } from 'lucide-react';
 import { ProfileInfo } from '../types';
 
 interface ContactProps {
@@ -194,6 +194,60 @@ export default function Contact({ profile, prefilledMessage }: ContactProps) {
                   <ExternalLink className="w-4 h-4" />
                 </span>
               </a>
+
+              {/* TikTok */}
+              {profile.tiktok && (
+                <a
+                  href={
+                    profile.tiktok.trim().startsWith('http')
+                      ? profile.tiktok.trim()
+                      : `https://tiktok.com/${profile.tiktok.trim().startsWith('@') ? profile.tiktok.trim() : '@' + profile.tiktok.trim()}`
+                  }
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-start gap-4 p-4 border border-[var(--line)] rounded-2xl bg-[var(--surface-2)] hover:border-sky-500/40 hover:-translate-y-0.5 transition-all group"
+                >
+                  <span className="w-10 h-10 rounded-xl flex items-center justify-center text-white bg-gradient-to-br from-[#111] to-[#333] flex-shrink-0">
+                    <span className="font-extrabold text-xs tracking-wider">Tiktok</span>
+                  </span>
+                  <div className="flex-grow min-w-0">
+                    <strong className="block text-xs text-[var(--muted)] font-bold uppercase tracking-wider">TikTok</strong>
+                    <span className="block text-sm sm:text-base text-[var(--text)] font-extrabold truncate">
+                      {profile.tiktok}
+                    </span>
+                  </div>
+                  <span className="p-2 border border-[var(--line)] rounded-xl bg-[var(--surface)] text-[var(--muted)] group-hover:text-sky-400 transition-colors self-center flex-shrink-0">
+                    <ExternalLink className="w-4 h-4" />
+                  </span>
+                </a>
+              )}
+
+              {/* YouTube */}
+              {profile.youtube && (
+                <a
+                  href={
+                    profile.youtube.trim().startsWith('http')
+                      ? profile.youtube.trim()
+                      : `https://youtube.com/${profile.youtube.trim().startsWith('@') ? profile.youtube.trim() : '@' + profile.youtube.trim()}`
+                  }
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-start gap-4 p-4 border border-[var(--line)] rounded-2xl bg-[var(--surface-2)] hover:border-red-500/40 hover:-translate-y-0.5 transition-all group"
+                >
+                  <span className="w-10 h-10 rounded-xl flex items-center justify-center text-white bg-gradient-to-br from-red-600 to-rose-500 flex-shrink-0">
+                    <Youtube className="w-5 h-5" />
+                  </span>
+                  <div className="flex-grow min-w-0">
+                    <strong className="block text-xs text-[var(--muted)] font-bold uppercase tracking-wider">YouTube</strong>
+                    <span className="block text-sm sm:text-base text-[var(--text)] font-extrabold truncate">
+                      {profile.youtube}
+                    </span>
+                  </div>
+                  <span className="p-2 border border-[var(--line)] rounded-xl bg-[var(--surface)] text-[var(--muted)] group-hover:text-red-500 transition-colors self-center flex-shrink-0">
+                    <ExternalLink className="w-4 h-4" />
+                  </span>
+                </a>
+              )}
             </div>
           </div>
 

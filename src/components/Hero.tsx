@@ -2,7 +2,7 @@ import React from 'react';
 import { ArrowRight, Sparkles, Play, ArrowUpRight, CheckCircle2, Wand2, Zap } from 'lucide-react';
 import { HeroInfo, ProfileInfo } from '../types';
 import Logo from './Logo';
-import { formatMediaUrl } from '../utils';
+import { formatMediaUrl, preventTranslation } from '../utils';
 
 interface HeroProps {
   hero: HeroInfo;
@@ -54,18 +54,18 @@ export default function Hero({ hero, profile }: HeroProps) {
           <div className="lg:col-span-7 flex flex-col items-start text-left">
             <span className="inline-flex items-center gap-2.5 px-3.5 py-2 border border-[var(--line)] rounded-full bg-[var(--surface)] shadow-sm text-[var(--muted)] text-sm font-extrabold mb-6">
               <span className="w-2.5 h-2.5 rounded-full bg-[var(--accent)] animate-pulse-custom" />
-              {hero.eyebrow}
+              {preventTranslation(hero.eyebrow)}
             </span>
 
             <h1 className="font-display font-bold text-4xl sm:text-5xl lg:text-7xl leading-[0.95] tracking-tighter text-[var(--text)] mb-6">
-              {hero.title}{' '}
+              {preventTranslation(hero.title)}{' '}
               <span className="text-transparent bg-clip-text bg-gradient-to-br from-[var(--primary)] to-[var(--secondary)]">
-                {hero.gradientTitle}
+                {preventTranslation(hero.gradientTitle)}
               </span>
             </h1>
 
             <p className="text-[var(--muted)] text-base sm:text-lg lg:text-xl leading-relaxed mb-8 max-w-2xl">
-              {hero.copy}
+              {preventTranslation(hero.copy)}
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto mb-10">
@@ -90,7 +90,7 @@ export default function Hero({ hero, profile }: HeroProps) {
                   key={idx}
                   className="inline-flex items-center gap-2 px-3.5 py-2 border border-[var(--line)] rounded-full bg-[var(--surface)] text-[var(--muted)] text-xs sm:text-sm font-extrabold shadow-sm"
                 >
-                  {tag}
+                  {preventTranslation(tag)}
                 </span>
               ))}
             </div>

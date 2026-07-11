@@ -2,10 +2,12 @@ import React, { useState } from 'react';
 import { Check, Sparkles, Gift } from 'lucide-react';
 import { PricePlan } from '../types';
 import BonusModal from './BonusModal';
+import { preventTranslation } from '../utils';
 
 interface PricingProps {
   plans: PricePlan[];
   onSelectPlan: (planTitle: string) => void;
+  tallyFormUrl?: string;
 }
 
 function PricingCard({ 
@@ -45,7 +47,7 @@ function PricingCard({
       {/* Franja de descuento */}
       {plan.hasDiscount && (
         <div className="absolute top-0 inset-x-0 bg-gradient-to-r from-red-600 to-rose-500 text-white text-center py-2 text-[10px] sm:text-[11px] font-black tracking-widest uppercase shadow-sm flex items-center justify-center gap-1.5 z-20">
-          <span>🏷️</span> {plan.discountLabel || 'DESCUENTO ESPECIAL'}
+          <span>🏷️</span> {preventTranslation(plan.discountLabel || 'DESCUENTO ESPECIAL')}
         </div>
       )}
 
@@ -58,7 +60,7 @@ function PricingCard({
 
       {/* Title */}
       <h3 className="font-display font-bold text-2xl text-[var(--text)] tracking-tight">
-        {plan.title}
+        {preventTranslation(plan.title)}
       </h3>
 
       {/* Price */}
@@ -74,7 +76,7 @@ function PricingCard({
                 {plan.discountedPrice || plan.price}
               </span>
               <span className="text-[var(--muted)] text-sm font-bold ml-2">
-                {plan.period}
+                {preventTranslation(plan.period)}
               </span>
             </div>
           </div>
@@ -84,7 +86,7 @@ function PricingCard({
               {plan.price}
             </span>
             <span className="text-[var(--muted)] text-sm font-bold ml-2">
-              {plan.period}
+              {preventTranslation(plan.period)}
             </span>
           </div>
         )}
@@ -92,7 +94,7 @@ function PricingCard({
 
       {/* Description */}
       <p className="text-[var(--muted)] text-sm leading-relaxed mb-6">
-        {plan.description}
+        {preventTranslation(plan.description)}
       </p>
 
       {/* Separation line */}
@@ -103,22 +105,20 @@ function PricingCard({
         {plan.features.map((feature, fIdx) => (
           <li key={fIdx} className="flex items-start gap-2.5 text-sm sm:text-base text-[var(--muted)] font-semibold">
             <Check className="w-4 h-4 text-[var(--accent)] mt-1 flex-shrink-0" />
-            <span>{feature}</span>
+            <span>{preventTranslation(feature)}</span>
           </li>
         ))}
       </ul>
 
       {/* Collapsible "+ Bonus & garantía" Section -> Modal trigger */}
       {plan.bonusWarranty && plan.bonusWarranty.trim() !== '' && (
-        <div className="mb-6 w-full text-left">
+        <div className="mb-6 w-full text-center flex justify-center">
           <button
             type="button"
             onClick={onOpenBonus}
-            className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-extrabold text-xs sm:text-sm flex items-center gap-1.5 cursor-pointer transition-colors focus:outline-none group"
+            className="animate-pulse-zoom px-4 py-2 rounded-full bg-blue-500/10 dark:bg-blue-500/20 text-blue-600 dark:text-blue-300 hover:text-blue-700 dark:hover:text-blue-200 border border-blue-500/20 font-extrabold text-xs sm:text-sm flex items-center justify-center gap-1.5 cursor-pointer transition-all focus:outline-none shadow-sm hover:shadow-md"
           >
-            <span className="flex items-center gap-1.5 hover:underline">
-              <span>🎁</span> + Bonus & garantía
-            </span>
+            <span>🎁</span> + Bonus & garantía
           </button>
         </div>
       )}
@@ -132,14 +132,28 @@ function PricingCard({
             : 'text-[var(--text)] bg-[var(--surface)] border border-[var(--line)] shadow-sm hover:-translate-y-0.5'
         }`}
       >
-        {plan.buttonText || `Elegir ${plan.title}`}
+        {preventTranslation(plan.buttonText || `Elegir ${plan.title}`)}
       </button>
     </article>
   );
 }
 
-export default function Pricing({ plans, onSelectPlan }: PricingProps) {
+export default function Pricing({ plans, onSelectPlan, tallyFormUrl }: PricingProps) {
   const [selectedPlanForBonus, setSelectedPlanForBonus] = useState<PricePlan | null>(null);
+
+  const getTallyId = (urlOrId?: string): string => {
+    if (!urlOrId) return "q4MD7g";
+    const trimmed = urlOrId.trim();
+    if (trimmed.includes('tally.so/r/')) {
+      const parts = trimmed.split('tally.so/r/');
+      if (parts[1]) {
+        return parts[1].split('?')[0];
+      }
+    }
+    return trimmed;
+  };
+
+  const tallyId = getTallyId(tallyFormUrl);
 
   return (
     <section className="py-20 bg-gradient-to-b from-transparent via-[var(--surface-2)] to-transparent" id="planes">
@@ -211,8 +225,13 @@ export default function Pricing({ plans, onSelectPlan }: PricingProps) {
             
             <div className="lg:col-span-4 flex lg:justify-end">
               <a
-                href="#contacto"
-                className="inline-flex items-center justify-center h-12 px-8 rounded-full font-extrabold text-[#1f130f] bg-white hover:-translate-y-0.5 hover:shadow-lg transition-all duration-200 w-full sm:w-auto text-center"
+                href={tallyFormUrl || "https://tally.so/r/q4MD7g"}
+                target="_blank"
+                rel="noopener noreferrer"
+                data-tally-open={tallyId}
+                data-tally-emoji-text="👋"
+                data-tally-emoji-animation="wave"
+                className="inline-flex items-center justify-center h-12 px-8 rounded-full font-extrabold text-[#1f130f] bg-white hover:-translate-y-0.5 hover:shadow-lg transition-all duration-200 w-full sm:w-auto text-center cursor-pointer"
               >
                 Solicitar propuesta
               </a>

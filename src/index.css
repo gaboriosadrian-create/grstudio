@@ -101,6 +101,22 @@ body::before {
   animation: pulse-custom 1.8s infinite;
 }
 
+@keyframes pulse-zoom {
+  0%, 100% {
+    transform: scale(1);
+    filter: drop-shadow(0 0 0px rgba(14, 94, 228, 0));
+  }
+  50% {
+    transform: scale(1.08);
+    filter: drop-shadow(0 0 12px rgba(14, 94, 228, 0.45));
+  }
+}
+
+.animate-pulse-zoom {
+  animation: pulse-zoom 1.6s infinite ease-in-out;
+  display: inline-flex;
+}
+
 @keyframes float-custom {
   0%, 100% {
     transform: translateY(0) rotate(var(--r, 0deg));

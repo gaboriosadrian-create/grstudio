@@ -9,10 +9,11 @@ export const defaultPortfolioData: PortfolioData = {
     "phone": "+54 9 2617486990",
     "whatsappMessage": "Hola Gabriel, quiero mejorar mi contenido para redes",
     "instagram": "@gabrielriosok",
-    "tiktok": "@tuusuario",
+    "tiktok": "",
     "linkedin": "https://www.linkedin.com/in/gabrielriosadrian/",
     "logoUrl": "/images/logo/logo_1783457905492_visual_creator.png",
-    "profilePhotoUrl": "/images/perfil/mi_foto_real.png"
+    "profilePhotoUrl": "/images/perfil/mi_foto_real.png",
+    "tallyFormUrl": "https://tally.so/r/q4MD7g"
   },
   "hero": {
     "eyebrow": "Disponible para nuevos proyectos",

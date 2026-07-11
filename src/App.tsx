@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Mail, MessageCircle, ExternalLink, Sparkles, Check, Copy } from 'lucide-react';
+import { MessageCircle, ExternalLink, Sparkles, Check } from 'lucide-react';
 import { defaultPortfolioData } from './initialPortfolioData.ts';
 import { PortfolioData } from './types.ts';
 import { savePortfolioData, loadPortfolioData, deletePortfolioData } from './db.ts';
@@ -20,7 +20,6 @@ export default function App() {
   const [data, setData] = useState<PortfolioData>(defaultPortfolioData);
   const [isDark, setIsDark] = useState(false);
   const [isEditorOpen, setIsEditorOpen] = useState(false);
-  const [copied, setCopied] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [isLegalOpen, setIsLegalOpen] = useState(false);
@@ -207,28 +206,19 @@ export default function App() {
     }
   };
 
-  // General Copy Email action
-  const handleCopyEmailDirect = async () => {
-    try {
-      if (navigator.clipboard && window.isSecureContext) {
-        await navigator.clipboard.writeText(data.profile.email);
-      } else {
-        const textarea = document.createElement('textarea');
-        textarea.value = data.profile.email;
-        textarea.style.position = 'fixed';
-        textarea.style.opacity = '0';
-        document.body.appendChild(textarea);
-        textarea.focus();
-        textarea.select();
-        document.execCommand('copy');
-        textarea.remove();
+  const getTallyId = (urlOrId?: string): string => {
+    if (!urlOrId) return "q4MD7g";
+    const trimmed = urlOrId.trim();
+    if (trimmed.includes('tally.so/r/')) {
+      const parts = trimmed.split('tally.so/r/');
+      if (parts[1]) {
+        return parts[1].split('?')[0];
       }
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2200);
-    } catch (err) {
-      // Fallback
     }
+    return trimmed;
   };
+
+  const tallyId = getTallyId(data.profile.tallyFormUrl);
 
   const whatsappUrl = `https://wa.me/${data.profile.phone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(data.profile.whatsappMessage)}`;
 
@@ -283,7 +273,7 @@ export default function App() {
         <Process steps={data.steps} />
 
         {/* Prices & Subscription Packages */}
-        <Pricing plans={data.plans} onSelectPlan={handleSelectPlan} />
+        <Pricing plans={data.plans} onSelectPlan={handleSelectPlan} tallyFormUrl={data.profile.tallyFormUrl} />
 
         {/* Contact Form Section */}
         <Contact profile={data.profile} prefilledMessage={prefilledMessage} />
@@ -316,12 +306,30 @@ export default function App() {
               </a>
               {data.profile.tiktok && (
                 <a
-                  href={`https://tiktok.com/${data.profile.tiktok}`}
+                  href={
+                    data.profile.tiktok.trim().startsWith('http')
+                      ? data.profile.tiktok.trim()
+                      : `https://tiktok.com/${data.profile.tiktok.trim().startsWith('@') ? data.profile.tiktok.trim() : '@' + data.profile.tiktok.trim()}`
+                  }
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-xs sm:text-sm font-bold text-slate-400 hover:text-white transition-colors flex items-center gap-1.5"
                 >
                   TikTok <ExternalLink className="w-3.5 h-3.5 opacity-60" />
+                </a>
+              )}
+              {data.profile.youtube && (
+                <a
+                  href={
+                    data.profile.youtube.trim().startsWith('http')
+                      ? data.profile.youtube.trim()
+                      : `https://youtube.com/${data.profile.youtube.trim().startsWith('@') ? data.profile.youtube.trim() : '@' + data.profile.youtube.trim()}`
+                  }
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-xs sm:text-sm font-bold text-slate-400 hover:text-white transition-colors flex items-center gap-1.5"
+                >
+                  YouTube <ExternalLink className="w-3.5 h-3.5 opacity-60" />
                 </a>
               )}
               {data.profile.linkedin && (
@@ -385,14 +393,19 @@ export default function App() {
 
       {/* Quick Floating contact tools */}
       <div className="fixed right-5 bottom-5 z-40 flex flex-col gap-2.5" aria-label="Contacto rápido">
-        {/* Copy email widget */}
-        <button
-          onClick={handleCopyEmailDirect}
-          className="w-13 h-13 rounded-full border border-[var(--line)] bg-[var(--surface)] text-[var(--text)] shadow-lg flex items-center justify-center hover:-translate-y-1 hover:border-[var(--primary)]/40 transition-all cursor-pointer"
-          aria-label="Copiar correo electrónico"
+        {/* Request proposal Tally widget */}
+        <a
+          href={data.profile.tallyFormUrl || "https://tally.so/r/q4MD7g"}
+          target="_blank"
+          rel="noopener noreferrer"
+          data-tally-open={tallyId}
+          data-tally-emoji-text="👋"
+          data-tally-emoji-animation="wave"
+          className="w-13 h-13 rounded-full border border-[var(--line)] bg-[var(--surface)] text-[var(--text)] shadow-lg flex items-center justify-center hover:-translate-y-1 hover:border-[var(--primary)]/40 transition-all cursor-pointer text-xl"
+          aria-label="Solicitar propuesta"
         >
-          <Mail className="w-5 h-5" />
-        </button>
+          👋
+        </a>
 
         {/* WhatsApp direct launch */}
         <a
@@ -404,17 +417,6 @@ export default function App() {
         >
           <MessageCircle className="w-5 h-5 fill-white/10" />
         </a>
-      </div>
-
-      {/* Direct copy confirmation feedback toast */}
-      <div
-        className={`fixed right-20 bottom-7 z-50 px-3.5 py-2 rounded-full bg-[var(--text)] text-[var(--bg)] text-xs font-black shadow-lg transition-all duration-300 pointer-events-none flex items-center gap-1.5 ${
-          copied ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'
-        }`}
-        role="status"
-        aria-live="polite"
-      >
-        <Check className="w-3.5 h-3.5 text-[var(--primary)]" /> Correo copiado
       </div>
 
       {/* Save confirmation feedback toast */}
