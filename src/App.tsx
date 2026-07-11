@@ -324,14 +324,20 @@ export default function App() {
                   TikTok <ExternalLink className="w-3.5 h-3.5 opacity-60" />
                 </a>
               )}
-              <a
-                href={`https://linkedin.com/in/${data.profile.linkedin.trim().replace(/\s+/g, '-')}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-xs sm:text-sm font-bold text-slate-400 hover:text-white transition-colors flex items-center gap-1.5"
-              >
-                LinkedIn <ExternalLink className="w-3.5 h-3.5 opacity-60" />
-              </a>
+              {data.profile.linkedin && (
+                <a
+                  href={
+                    data.profile.linkedin.trim().startsWith('http')
+                      ? data.profile.linkedin.trim()
+                      : `https://linkedin.com/in/${data.profile.linkedin.trim().replace(/\s+/g, '-')}`
+                  }
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-xs sm:text-sm font-bold text-slate-400 hover:text-white transition-colors flex items-center gap-1.5"
+                >
+                  LinkedIn <ExternalLink className="w-3.5 h-3.5 opacity-60" />
+                </a>
+              )}
             </div>
           </div>
 
